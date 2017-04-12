@@ -18,7 +18,7 @@ public class RailMovement : MonoBehaviour
 
     private bool isOnIntersection;
     private bool needDeathPoint;
-    private Transform[] threeWaysIntersection = new Transform[3];
+    private Transform[] threeWaysIntersection = new Transform[4];
     private Transform intersection;
 
     // Use this for initialization
@@ -174,7 +174,8 @@ public class RailMovement : MonoBehaviour
         return new Transform[] {
             intersection.GetComponent<RailBehavior>().nextRail,
             intersection.GetComponent<RailBehavior>().previousRail,
-            intersection.GetComponent<RailBehavior>().thirdRail
+            intersection.GetComponent<RailBehavior>().thirdRail,
+            intersection.GetComponent<RailBehavior>().fourthRail
         };
     }
 

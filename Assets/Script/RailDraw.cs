@@ -36,6 +36,11 @@ public class RailDraw : MonoBehaviour
                 positions[1] = transform.GetChild(i).GetComponent<RailBehavior>().thirdRail.position;
                 addLineRenderer(positions);
             }
+            if(transform.GetChild(i).GetComponent<RailBehavior>().fourthRail != null)
+            {
+                positions[1] = transform.GetChild(i).GetComponent<RailBehavior>().fourthRail.position;
+                addLineRenderer(positions);
+            }
         }
     }
 

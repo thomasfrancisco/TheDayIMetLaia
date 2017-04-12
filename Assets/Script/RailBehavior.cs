@@ -7,6 +7,7 @@ public class RailBehavior : MonoBehaviour {
     public Transform previousRail;
     public Transform nextRail;
     public Transform thirdRail;
+    public Transform fourthRail;
     public bool isBlocked;
 
 	// Use this for initialization
