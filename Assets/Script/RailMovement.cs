@@ -18,7 +18,7 @@ public class RailMovement : MonoBehaviour
 
     private bool isOnIntersection;
     private bool needDeathPoint;
-    private Transform[] threeWaysIntersection = new Transform[4];
+    private Transform[] threeWaysIntersection;
     private Transform intersection;
 
     // Use this for initialization
@@ -42,14 +42,15 @@ public class RailMovement : MonoBehaviour
             if (!needDeathPoint)
             {
                 chooseDirection();
-            } else
+            }
+            else
             {
-                if(Input.GetAxis("Vertical") == 0)
+                if (Input.GetAxis("Vertical") == 0)
                 {
                     needDeathPoint = false;
                 }
             }
-            
+
         }
         else
         {
@@ -59,7 +60,7 @@ public class RailMovement : MonoBehaviour
             {
                 if (nextElement != null && !secondElement.GetComponent<RailBehavior>().isBlocked)
                 {
-                    if (secondElement.GetComponent<RailBehavior>().thirdRail != null)
+                    if (secondElement.GetComponent<RailBehavior>().nextRail != null)
                     {
                         isOnIntersection = true;
                         needDeathPoint = true;
@@ -81,7 +82,7 @@ public class RailMovement : MonoBehaviour
             {
                 if (previousElement != null && !firstElement.GetComponent<RailBehavior>().isBlocked)
                 {
-                    if (firstElement.GetComponent<RailBehavior>().thirdRail != null)
+                    if (firstElement.GetComponent<RailBehavior>().nextRail != null)
                     {
                         isOnIntersection = true;
                         needDeathPoint = true;
@@ -171,12 +172,28 @@ public class RailMovement : MonoBehaviour
 
     private Transform[] fillThreeWays(Transform intersection)
     {
-        return new Transform[] {
-            intersection.GetComponent<RailBehavior>().nextRail,
-            intersection.GetComponent<RailBehavior>().previousRail,
-            intersection.GetComponent<RailBehavior>().thirdRail,
-            intersection.GetComponent<RailBehavior>().fourthRail
-        };
+
+        RailBehavior rail = intersection.GetComponent<RailBehavior>();
+        if (rail.fourthRail != null)
+        {
+            return new Transform[] {
+            rail.nextRail,
+            rail.previousRail,
+            rail.thirdRail,
+            rail.fourthRail
+            };
+        } else if (rail.thirdRail != null)
+        {
+            return new Transform[]
+            {
+                rail.nextRail, rail.previousRail, rail.thirdRail
+            };
+        } else 
+        {
+            return new Transform[] { rail.nextRail, rail.previousRail };
+        }
+
+
     }
 
     // Devrait y avoir moyen d'optimiser ça un peu
@@ -204,5 +221,5 @@ public class RailMovement : MonoBehaviour
 
         return null;
     }
-    
+
 }
