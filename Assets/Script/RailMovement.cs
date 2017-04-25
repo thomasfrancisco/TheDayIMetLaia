@@ -10,6 +10,9 @@ public class RailMovement : MonoBehaviour
     public float speed;
     public Transform firstRail;
 
+    public bool avanceDebloque;
+    public bool reculeDebloque;
+
     private Transform firstElement;
     private Transform secondElement;
     private Transform nextElement; //Save it to test in update loop
@@ -20,6 +23,10 @@ public class RailMovement : MonoBehaviour
     private bool needDeathPoint;
     private Transform[] threeWaysIntersection;
     private Transform intersection;
+
+    //champ public pour donner l'état d'UGO
+    [HideInInspector]
+    public bool isMovingForward;
 
     // Use this for initialization
     void Start()
@@ -129,17 +136,23 @@ public class RailMovement : MonoBehaviour
 
     private float newAlphaPosition()
     {
-        if (Input.GetAxis("Vertical") != 0)
+        float verticalAxis = Input.GetAxis("Vertical");
+        if (verticalAxis != 0)
         {
+            if (verticalAxis > 0 && !avanceDebloque) return 0f;
+            if (verticalAxis < 0 && !reculeDebloque) return 0f;
+
             float angleFirstElement = getAngleWithObject(firstElement);
             float angleSecondElement = getAngleWithObject(secondElement);
             if (angleSecondElement < angleMaxDirection)
             {
-                return Input.GetAxis("Vertical") * speed * Time.deltaTime;
+                if (verticalAxis > 0) isMovingForward = true;
+                return verticalAxis * speed * Time.deltaTime;
             }
             else if (angleFirstElement < angleMaxDirection)
             {
-                return -Input.GetAxis("Vertical") * speed * Time.deltaTime;
+                if (verticalAxis > 0) isMovingForward = true;
+                return -verticalAxis * speed * Time.deltaTime;
             }
             else
             {
@@ -149,6 +162,7 @@ public class RailMovement : MonoBehaviour
         }
         else
         {
+            isMovingForward = false;
             return 0f;
         }
     }

@@ -10,31 +10,65 @@ public class Puzzle1Script : MonoBehaviour {
 
     private Animator tiltAnim;
     private Animator doorAnim;
-    private bool isOnDoor;
 
+    [HideInInspector]
+    public bool isOnDoor;
+    [HideInInspector]
+    public bool isDoorOpen;
+    private bool firstTry;
 
-	// Use this for initialization
-	void Start () {
+    private SonPuzzle1 scriptSons;
+
+    private void Awake()
+    {
+        
         tiltAnim = GetComponent<Animator>();
         doorAnim = transform.parent.GetComponent<Animator>();
+        scriptSons = GetComponentInParent<SonPuzzle1>();
+    }
+
+    // Use this for initialization
+    void Start () {
+        isDoorOpen = false;
         isOnDoor = false;
+        firstTry = true;
 	}
 	
 	// Update is called once per frame
 	void Update () {
         if(Vector3.Distance(transform.parent.position, player.position) < radiusDetection)
         {
-            if (Input.inputString == "\n" && isOnDoor)
+            if (Input.inputString == "\n" || Input.GetButtonDown("Fire1"))
             {
-                doorAnim.SetBool("isOpen?", true);
-                tiltAnim.speed = 0;
-                relatedBlockedRail.GetComponent<RailBehavior>().isBlocked = false;
-            } 
-        }
-        
-        
-		
+                if (isOnDoor)
+                {
+                    if (!firstTry)
+                    {
+                        openingDoor();
+                    }
+                    else
+                    {
+                        scriptSons.playFail();
+                        firstTry = false;
+                    }
+                } else
+                {
+                    scriptSons.playFail();
+                }
+            }
+        }		
 	}
+
+    private void openingDoor()
+    {
+        isDoorOpen = true;
+        scriptSons.playWin();
+        doorAnim.SetBool("isOpen?", true);
+        tiltAnim.speed = 0;
+        wait(1f);
+        scriptSons.playDoorOpen();
+        relatedBlockedRail.GetComponent<RailBehavior>().isBlocked = false;
+    }
 
     public void setOnDoor(int value)
     {
@@ -42,6 +76,11 @@ public class Puzzle1Script : MonoBehaviour {
             isOnDoor = true;
         else
             isOnDoor = false;
+    }
+
+    IEnumerator wait(float sec)
+    {
+        yield return new WaitForSeconds(sec);
     }
 
 }
