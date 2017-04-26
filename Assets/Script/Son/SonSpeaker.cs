@@ -29,6 +29,7 @@ public class SonSpeaker : MonoBehaviour {
     private Quaternion previousHeadRotation;
     private Puzzle1Script puzzle1Script;
     private RailMovement ugoRailMovement;
+    private SonAiguillage sonAiguillage;
 
 	// Use this for initialization
 	void Awake () {
@@ -37,6 +38,7 @@ public class SonSpeaker : MonoBehaviour {
         source.loop = false;
         puzzle1Script = puzzle1.FindChild("Tilt").GetComponent<Puzzle1Script>();
         ugoRailMovement = ugo.GetComponent<RailMovement>();
+        sonAiguillage = ugo.Find("Aiguillage").GetComponent<SonAiguillage>();
 	}
 	
 	// Update is called once per frame
@@ -85,6 +87,7 @@ public class SonSpeaker : MonoBehaviour {
                 {
                     if (source.timeSamples >= n0_003.samples)
                     {
+                        sonAiguillage.playActivation();
                         ugoRailMovement.avanceDebloque = true;
                         nextAction = actionExpected.moveForward;
                     }

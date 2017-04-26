@@ -13,6 +13,7 @@ public class SonPuzzle1 : MonoBehaviour {
     private AudioSource sourceDoor;
     private AudioSource sourceSignal;
     private AudioSource sourceFeedback;
+    private AudioSource sourceZoneActive;
 
     private Puzzle1Script script;
 
@@ -24,6 +25,7 @@ public class SonPuzzle1 : MonoBehaviour {
         sourceDoor = transform.Find("Son Porte").GetComponent<AudioSource>();
         sourceSignal = transform.Find("Tilt/Signal Electrique").GetComponent<AudioSource>();
         sourceFeedback = transform.Find("Tilt/FeedBack").GetComponent<AudioSource>();
+        sourceZoneActive = transform.Find("Tilt/Signal Electrique/SonZoneActive").GetComponent<AudioSource>();
         script = GetComponentInChildren<Puzzle1Script>();
     }
     // Use this for initialization
@@ -35,6 +37,10 @@ public class SonPuzzle1 : MonoBehaviour {
 
         sourceDoor.loop = false;
         sourceDoor.playOnAwake = false;
+
+        sourceZoneActive.clip = activeZone;
+        sourceZoneActive.playOnAwake = false;
+        sourceZoneActive.loop = false;
 	}
 	
 	// Update is called once per frame
@@ -43,19 +49,11 @@ public class SonPuzzle1 : MonoBehaviour {
         {
             if (script.isOnDoor)
             {
-                sourceSignal.clip = activeZone;
-                if (!sourceSignal.isPlaying)
-                {
-                    sourceSignal.Play();
-                }
+                sourceZoneActive.Play();
             }
             else
             {
-                sourceSignal.clip = electricLoop;
-                if (!sourceSignal.isPlaying)
-                {
-                    sourceSignal.Play();
-                }
+                sourceZoneActive.Stop();
             }
         }
 	}

@@ -4,17 +4,19 @@ using UnityEngine;
 
 public class SonAiguillage : MonoBehaviour {
 
-    public AudioClip AigSol;
-    public AudioClip AigDecroche;
-    public AudioClip AigAccroche;
-    public AudioClip AigDirection;
-    public AudioClip AigVisee;
-    public AudioClip AigValidation;
-    public AudioClip AigWrong;
-    public AudioClip AigMouvement;
+    public AudioClip aigActivation;
 
-	// Use this for initialization
-	void Start () {
+    private AudioSource source;
+
+
+    private void Awake()
+    {
+        source = GetComponent<AudioSource>();
+        source.playOnAwake = false;
+        source.loop = false;
+    }
+    // Use this for initialization
+    void Start () {
 		
 	}
 	
@@ -22,4 +24,10 @@ public class SonAiguillage : MonoBehaviour {
 	void Update () {
 		
 	}
+
+    public void playActivation()
+    {
+        source.clip = aigActivation;
+        source.Play();
+    }
 }

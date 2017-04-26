@@ -15,7 +15,7 @@ public class Puzzle1Script : MonoBehaviour {
     public bool isOnDoor;
     [HideInInspector]
     public bool isDoorOpen;
-    private bool firstTry;
+    //private bool firstTry;
 
     private SonPuzzle1 scriptSons;
 
@@ -31,7 +31,7 @@ public class Puzzle1Script : MonoBehaviour {
     void Start () {
         isDoorOpen = false;
         isOnDoor = false;
-        firstTry = true;
+        //firstTry = true;
 	}
 	
 	// Update is called once per frame
@@ -42,15 +42,15 @@ public class Puzzle1Script : MonoBehaviour {
             {
                 if (isOnDoor)
                 {
-                    if (!firstTry)
-                    {
+                    //if (!firstTry)
+                    //{
                         openingDoor();
-                    }
-                    else
-                    {
-                        scriptSons.playFail();
-                        firstTry = false;
-                    }
+                    //}
+                    //else
+                    //{
+                    //    scriptSons.playFail();
+                    //    firstTry = false;
+                    //}
                 } else
                 {
                     scriptSons.playFail();
