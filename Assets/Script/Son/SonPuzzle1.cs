@@ -49,6 +49,7 @@ public class SonPuzzle1 : MonoBehaviour {
         {
             if (script.isOnDoor)
             {
+                if(!sourceZoneActive.isPlaying)
                 sourceZoneActive.Play();
             }
             else
