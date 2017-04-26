@@ -82,6 +82,7 @@ public class RailMovement : MonoBehaviour
                 else
                 {
                     alpha = 0.99f;
+                    isMovingForward = false;
                 }
             }
 
@@ -104,6 +105,7 @@ public class RailMovement : MonoBehaviour
                 else
                 {
                     alpha = 0;
+                    isMovingForward = false;
                 }
             }
         }
