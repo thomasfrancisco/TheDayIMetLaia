@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SonSpeaker : MonoBehaviour {
+public class SonSpeaker : MonoBehaviour
+{
 
     private enum actionExpected
     {
@@ -31,18 +32,21 @@ public class SonSpeaker : MonoBehaviour {
     private RailMovement ugoRailMovement;
     private SonAiguillage sonAiguillage;
 
-	// Use this for initialization
-	void Awake () {
+
+    // Use this for initialization
+    void Awake()
+    {
         source = GetComponent<AudioSource>();
         source.playOnAwake = false;
         source.loop = false;
         puzzle1Script = puzzle1.FindChild("Tilt").GetComponent<Puzzle1Script>();
         ugoRailMovement = ugo.GetComponent<RailMovement>();
         sonAiguillage = ugo.Find("Aiguillage").GetComponent<SonAiguillage>();
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
 
         switch (nextAction)
         {
@@ -51,33 +55,36 @@ public class SonSpeaker : MonoBehaviour {
                 {
                     source.clip = n0_001;
                     source.Play();
-                } else
+                }
+                else
                 {
-                    if(source.timeSamples >= n0_001.samples)
+                    if (source.timeSamples >= n0_001.samples)
                     {
                         nextAction = actionExpected.moveHead1;
+                        previousHeadRotation = Camera.main.transform.rotation;
                     }
                 }
 
                 break;
             case actionExpected.moveHead1:
-                if(Quaternion.Angle(Camera.main.transform.rotation, previousHeadRotation) > minAngleForHeadMovement
+                if (Quaternion.Angle(previousHeadRotation, Camera.main.transform.rotation) > minAngleForHeadMovement
                     && source.clip != n0_002)
                 {
                     source.clip = n0_002;
                     source.Play();
                 }
-                if(source.clip == n0_002)
+                if (source.clip == n0_002)
                 {
-                    if(source.timeSamples >= n0_002.samples)
+                    if (source.timeSamples >= n0_002.samples)
                     {
                         nextAction = actionExpected.moveHead2;
+                        previousHeadRotation = Camera.main.transform.rotation;
                     }
                 }
                 break;
 
             case actionExpected.moveHead2:
-                if (Quaternion.Angle(Camera.main.transform.rotation, previousHeadRotation) > minAngleForHeadMovement
+                if (Quaternion.Angle(previousHeadRotation, Camera.main.transform.rotation) > minAngleForHeadMovement
                     && source.clip != n0_003)
                 {
                     source.clip = n0_003;
@@ -95,23 +102,23 @@ public class SonSpeaker : MonoBehaviour {
                 break;
 
             case actionExpected.moveForward:
-                if(Input.GetAxis("Vertical") > 0
+                if (Input.GetAxis("Vertical") > 0
                     && !(source.clip == n0_004 || source.clip == n0_005))
                 {
                     source.clip = n0_004;
                     source.Play();
                 }
-                if(source.clip == n0_004)
+                if (source.clip == n0_004)
                 {
-                    if(source.timeSamples >= n0_004.samples)
+                    if (source.timeSamples >= n0_004.samples)
                     {
                         source.clip = n0_005;
                         source.Play();
                     }
                 }
-                if(source.clip == n0_005)
+                if (source.clip == n0_005)
                 {
-                    if(source.timeSamples >= n0_005.samples)
+                    if (source.timeSamples >= n0_005.samples)
                     {
                         nextAction = actionExpected.activateDoor;
                     }
@@ -126,8 +133,8 @@ public class SonSpeaker : MonoBehaviour {
                 }
                 break;
         }
-        previousHeadRotation = Camera.main.transform.rotation;
-		
-	}
-    
+
+
+    }
+
 }
