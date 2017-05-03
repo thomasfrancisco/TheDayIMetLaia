@@ -55,6 +55,29 @@ public class RailScriptV2 : MonoBehaviour {
             Gizmos.color = Color.blue;
         }
         Gizmos.DrawSphere(transform.position, .1f);
+
+        if(previousRail != null)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, previousRail.position, 0.5f));
+        }
+        
+        if(nextRail != null)
+        {            
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, nextRail.position, 0.5f));
+            
+        }
+        if(thirdRail != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, thirdRail.position, 0.5f));
+        }
+        if(fourthRail != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, fourthRail.position, 0.5f));
+        }
     }
 
     public void changeAiguillage()
