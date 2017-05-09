@@ -64,7 +64,7 @@ public class windowsRailCreationV2 : EditorWindow {
                         lastObject.GetComponent<RailScriptV2>().isSelected = true;
                     } else if(hit.collider.tag == "Ground")
                     {
-                        GameObject go = (GameObject)Instantiate(rail, hit.point + Vector3.up, Quaternion.identity, parent);
+                        GameObject go = (GameObject)Instantiate(rail, hit.point + Vector3.up * 2, Quaternion.identity, parent);
                         Undo.RegisterCreatedObjectUndo(go, "Creation de rail");
                         go.tag = "Rail";
                         if(lastObject == null)
