@@ -13,37 +13,42 @@ public class RailScriptV2 : MonoBehaviour {
     public bool isBlocked;
     public bool isSelected;
     public AigPosition aigPosition;
+    public bool oneWay; //Ne bloque pas le joueur si il passe dessus
+
 
     private RailScriptV2[] aig1;
     private RailScriptV2[] aig2;
-    [HideInInspector]
-    public bool oneWay;
+
+
+
 
     // Use this for initialization
     void Start() {
         isSelected = false;
-        if (previousRail != null && nextRail != null)
-        {
-            aig1 = new RailScriptV2[2];
-            aig1[0] = previousRail.GetComponent<RailScriptV2>();
-            aig1[1] = nextRail.GetComponent<RailScriptV2>();
-            isBlocked = false;
-        } else
-        {
-            isBlocked = true;
-        }
-        if (thirdRail != null && fourthRail != null)
-        {
-            aig2 = new RailScriptV2[2];
-            aig2[0] = thirdRail.GetComponent<RailScriptV2>();
-            aig2[1] = fourthRail.GetComponent<RailScriptV2>();
-            oneWay = false;
-        } else
-        {
-            oneWay = true;
-        }
+        ArrayList tmp = new ArrayList();
+        if (previousRail != null)
+            tmp.Add(previousRail.GetComponent<RailScriptV2>());
+        if (nextRail != null)
+            tmp.Add(nextRail.GetComponent<RailScriptV2>());
+
+        aig1 = (RailScriptV2[])tmp.ToArray(typeof(RailScriptV2));
+
+
+        tmp.Clear();
+
+        if (thirdRail != null)
+            tmp.Add(thirdRail.GetComponent<RailScriptV2>());
+        if (fourthRail != null)
+            tmp.Add(fourthRail.GetComponent<RailScriptV2>());
+        aig2 = (RailScriptV2[])tmp.ToArray(typeof(RailScriptV2));
+        
+        
         aigPosition = AigPosition.aig1;
+
+
+
     }
+    
 
     private void OnDrawGizmos()
     {

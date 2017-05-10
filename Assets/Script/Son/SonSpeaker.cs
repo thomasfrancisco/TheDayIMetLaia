@@ -29,7 +29,7 @@ public class SonSpeaker : MonoBehaviour
     private actionExpected nextAction;
     private Quaternion previousHeadRotation;
     private Puzzle1Script puzzle1Script;
-    private RailMovement ugoRailMovement;
+    private RailMovementV2 ugoRailMovement;
     private SonAiguillage sonAiguillage;
 
 
@@ -40,7 +40,7 @@ public class SonSpeaker : MonoBehaviour
         source.playOnAwake = false;
         source.loop = false;
         puzzle1Script = puzzle1.FindChild("Tilt").GetComponent<Puzzle1Script>();
-        ugoRailMovement = ugo.GetComponent<RailMovement>();
+        ugoRailMovement = ugo.GetComponent<RailMovementV2>();
         sonAiguillage = ugo.Find("Aiguillage").GetComponent<SonAiguillage>();
     }
 

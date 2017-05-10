@@ -43,8 +43,15 @@ public class windowsRailCreationV2 : EditorWindow {
     {
         if(parent == null)
         {
-            parent = (new GameObject()).transform;
-            parent.name = "Rails";
+            GameObject obj = GameObject.Find("Rails");
+            if (obj == null)
+            {
+                parent = (new GameObject()).transform;
+                parent.name = "Rails";
+            } else
+            {
+                parent = obj.transform;
+            }
         }
 
         if (isPainting)

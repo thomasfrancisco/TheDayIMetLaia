@@ -67,7 +67,7 @@ public class Puzzle1Script : MonoBehaviour {
         tiltAnim.speed = 0;
         wait(1f);
         scriptSons.playDoorOpen();
-        relatedBlockedRail.GetComponent<RailBehavior>().isBlocked = false;
+        relatedBlockedRail.GetComponent<RailScriptV2>().isBlocked = false;
     }
 
     public void setOnDoor(int value)

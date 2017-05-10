@@ -9,13 +9,16 @@ public class SonMoteur : MonoBehaviour {
     public AudioClip moveForwardEnd;
 
     private AudioSource source;
-    private RailMovement UgoMovementScript;
+    private RailMovementV2 UgoMovementScript;
 
     private bool lastUgoForwardState;
+    private float timeLoop;
+    private float minTimeToEnd = 0.5f; //Temps minimum de loop requis pour déclencher le son de fin 
 
     private void Awake()
     {
-        UgoMovementScript = GetComponentInParent<RailMovement>();
+        timeLoop = 0f;
+        UgoMovementScript = GetComponentInParent<RailMovementV2>();
         source = GetComponent<AudioSource>();
         lastUgoForwardState = false;
     }
@@ -33,10 +36,12 @@ public class SonMoteur : MonoBehaviour {
             source.clip = moveForwardStart;
             source.loop = false;
             source.Play();
+            timeLoop = 0f;
         }
 
-        if(UgoMovementScript.isMovingForward && lastUgoForwardState)
+         else if(UgoMovementScript.isMovingForward && lastUgoForwardState)
         {
+            timeLoop += Time.deltaTime;
             //Loop
             if(source.clip == moveForwardStart)
             {
@@ -51,14 +56,17 @@ public class SonMoteur : MonoBehaviour {
             }
         }
 
-        if(!UgoMovementScript.isMovingForward && !lastUgoForwardState)
+        else if(!UgoMovementScript.isMovingForward && !lastUgoForwardState)
         {
             //Fin
             if (source.clip == moveForwardStart || source.clip == moveForwardLoop)
             {
-                source.clip = moveForwardEnd;
-                source.loop = false;
-                source.Play();
+                if (timeLoop > minTimeToEnd)
+                {
+                    source.clip = moveForwardEnd;
+                    source.loop = false;
+                    source.Play();
+                }
             }
         }
 

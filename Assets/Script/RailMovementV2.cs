@@ -9,7 +9,10 @@ public class RailMovementV2 : MonoBehaviour {
     public float angleIntersection; //Angle permettant de valider un changement d'aiguillage
     public float speed;
 
-    [HideInInspector]
+    public bool avanceDebloque;
+    public bool reculeDebloque;
+
+   // [HideInInspector]
     public bool isMovingForward;
     [HideInInspector]
     public bool isMovingBackward;
@@ -61,8 +64,15 @@ public class RailMovementV2 : MonoBehaviour {
             }
         } else
         {
-            move();
-            testIntersection();
+            if (movementUnlocked())
+            {
+                move();
+                testIntersection();
+            } else
+            {
+                updateMovementState(0f, false);
+            }
+            
         }
 	}
 
@@ -71,10 +81,23 @@ public class RailMovementV2 : MonoBehaviour {
     private void updateAiguillage()
     {
         RailScriptV2[] choiceUndisposedIntersection = intersection.getUndisposedAiguillage();
-        if(getAngleWithObject(choiceUndisposedIntersection[0].transform) < angleIntersection
-            || getAngleWithObject(choiceUndisposedIntersection[1].transform) < angleIntersection)
+        if (choiceUndisposedIntersection.Length == 2)
         {
-            intersection.changeAiguillage();
+            if (getAngleWithObject(choiceUndisposedIntersection[0].transform) < angleIntersection
+                || getAngleWithObject(choiceUndisposedIntersection[1].transform) < angleIntersection)
+            {
+                intersection.changeAiguillage();
+            }
+        } else if (choiceUndisposedIntersection.Length == 1)
+        {
+            if(getAngleWithObject(choiceUndisposedIntersection[0].transform) < angleIntersection)
+            {
+                intersection.changeAiguillage();
+            }
+        } else
+        {
+            //Pas d'intersection
+
         }
     }
 
@@ -84,33 +107,47 @@ public class RailMovementV2 : MonoBehaviour {
         RailScriptV2[] choiceIntersection = intersection.getRailAiguillage();
         if(Input.GetAxis("Vertical") > 0)
         {
-            if(getAngleWithObject(choiceIntersection[0].transform) < angleIntersection)
+            if (choiceIntersection.Length > 0)
             {
-                previous = intersection;
-                next = choiceIntersection[0];
-                isOnIntersection = false;
-                alphaPosition = 0.01f;
-            } else if (getAngleWithObject(choiceIntersection[1].transform) < angleIntersection)
+                if (getAngleWithObject(choiceIntersection[0].transform) < angleIntersection)
+                {
+                    previous = intersection;
+                    next = choiceIntersection[0];
+                    isOnIntersection = false;
+                    alphaPosition = 0.01f;
+                }
+            }
+            if (choiceIntersection.Length > 1)
             {
-                previous = intersection;
-                next = choiceIntersection[1];
-                isOnIntersection = false;
-                alphaPosition = 0.01f;
+                if (getAngleWithObject(choiceIntersection[1].transform) < angleIntersection)
+                {
+                    previous = intersection;
+                    next = choiceIntersection[1];
+                    isOnIntersection = false;
+                    alphaPosition = 0.01f;
+                }
             }
         } else if(Input.GetAxis("Vertical") < 0)
         {
-            if(getAngleWithObject(choiceIntersection[0].transform) < angleIntersection)
+            if (choiceIntersection.Length > 0)
             {
-                previous = choiceIntersection[1];
-                next = intersection;
-                isOnIntersection = false;
-                alphaPosition = 0.99f;
-            } else if(getAngleWithObject(choiceIntersection[1].transform) < angleIntersection)
+                if (getAngleWithObject(choiceIntersection[0].transform) < angleIntersection)
+                {
+                    previous = choiceIntersection[1];
+                    next = intersection;
+                    isOnIntersection = false;
+                    alphaPosition = 0.99f;
+                }
+            }
+            if (choiceIntersection.Length > 1)
             {
-                previous = choiceIntersection[1];
-                next = intersection;
-                isOnIntersection = false;
-                alphaPosition = 0.99f;
+                if (getAngleWithObject(choiceIntersection[1].transform) < angleIntersection)
+                {
+                    previous = choiceIntersection[1];
+                    next = intersection;
+                    isOnIntersection = false;
+                    alphaPosition = 0.99f;
+                }
             }
         }
     }
@@ -128,14 +165,38 @@ public class RailMovementV2 : MonoBehaviour {
     {
         if(alphaPosition < 0)
         {
-            intersection = previous;
-            isOnIntersection = true;
-            needDeathPoint = true;
+            if (!previous.oneWay)
+            {
+                intersection = previous;
+                isOnIntersection = true;
+                needDeathPoint = true;
+                updateMovementState(0f, false);
+            } else
+            {
+                if (!previous.isBlocked)
+                {
+                    next = previous;
+                    previous = previous.getRailAiguillage()[1];
+                    alphaPosition = 0.99f;
+                }
+            }
         } else if (alphaPosition > 1)
         {
-            intersection = next;
-            isOnIntersection = true;
-            needDeathPoint = true;
+            if (!next.oneWay)
+            {
+                intersection = next;
+                isOnIntersection = true;
+                needDeathPoint = true;
+                updateMovementState(0f, false);
+            } else
+            {
+                if (!next.isBlocked)
+                {
+                    previous = next;
+                    next = next.getRailAiguillage()[0];
+                    alphaPosition = 0.01f;
+                }
+            }
         }
     }
 
@@ -178,11 +239,13 @@ public class RailMovementV2 : MonoBehaviour {
             if(angleSecondElement < angleMaxDirection)
             {
                 updateMovementState(verticalAxis, true);
-                return verticalAxis * speed * Time.deltaTime;
+                //return verticalAxis * speed * Time.deltaTime;
+                return verticalAxis * (speed / Vector3.Distance(previous.transform.position, next.transform.position)) * Time.deltaTime;
             } else if (angleNextElement < angleMaxDirection)
             {
                 updateMovementState(verticalAxis, true);
-                return verticalAxis * speed * Time.deltaTime * -1;
+                //return verticalAxis * speed * Time.deltaTime * -1;
+                return verticalAxis * (speed / Vector3.Distance(previous.transform.position, next.transform.position)) * Time.deltaTime * -1;
             } else
             {
                 updateMovementState(verticalAxis, false);
@@ -195,14 +258,25 @@ public class RailMovementV2 : MonoBehaviour {
         }
     }
 
+
+    // Vérifie si la fonction "avancer" ou "reculer" est bien débloqué
+    private bool movementUnlocked()
+    {
+        return ((Input.GetAxis("Vertical") > 0 && avanceDebloque)
+            || (Input.GetAxis("Vertical") < 0 && reculeDebloque));
+
+    }
+
+    //Annule un mouvement en cas de collision avec une bordure
     private void cancelMovement()
     {
+        updateMovementState(0f, false);
         if(alphaPosition < 0)
         {
-            alphaPosition += speed * Time.deltaTime;
+            alphaPosition += (speed / Vector3.Distance(previous.transform.position, next.transform.position)) * Time.deltaTime;
         } else
         {
-            alphaPosition -= speed * Time.deltaTime;
+            alphaPosition -= (speed / Vector3.Distance(previous.transform.position, next.transform.position)) * Time.deltaTime;
         }
         isOnIntersection = false;
     }
