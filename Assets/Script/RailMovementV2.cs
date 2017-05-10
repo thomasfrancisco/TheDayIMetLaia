@@ -35,6 +35,7 @@ public class RailMovementV2 : MonoBehaviour {
 
         previous = firstRail.GetComponent<RailScriptV2>();
         next = previous.nextRail.GetComponent<RailScriptV2>();
+        transform.position = firstRail.position;
         
     }
 	
