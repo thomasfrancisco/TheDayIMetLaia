@@ -12,7 +12,8 @@ public class RailMovementV2 : MonoBehaviour {
     public bool avanceDebloque;
     public bool reculeDebloque;
 
-   // [HideInInspector]
+    //boolean pour les sons avancer et reculer
+    [HideInInspector]
     public bool isMovingForward;
     [HideInInspector]
     public bool isMovingBackward;
@@ -30,6 +31,9 @@ public class RailMovementV2 : MonoBehaviour {
     private int iteratorTimer;
     public float frequenceSons;
 
+    //Autre source sonore correspondant au corp d'UGO
+    private AudioSource chocSource;
+
 	// Use this for initialization
 	void Start () {
         alphaPosition = 0.01f;
@@ -44,6 +48,8 @@ public class RailMovementV2 : MonoBehaviour {
 
         timerSound = 0f;
         iteratorTimer = 0;
+
+        chocSource = transform.FindChild("Choc").GetComponent<AudioSource>();
         
     }
 	
@@ -289,6 +295,10 @@ public class RailMovementV2 : MonoBehaviour {
             alphaPosition -= (speed / Vector3.Distance(previous.transform.position, next.transform.position)) * Time.deltaTime;
         }
         isOnIntersection = false;
+        if (!chocSource.isPlaying)
+        {
+            chocSource.Play();
+        }
     }
 
     private void playSoundsRails()
