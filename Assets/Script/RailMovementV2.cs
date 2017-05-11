@@ -25,6 +25,11 @@ public class RailMovementV2 : MonoBehaviour {
     private RailScriptV2 intersection;
     private bool needDeathPoint;
 
+    //Timer pour jouer les sons
+    private float timerSound;
+    private int iteratorTimer;
+    public float frequenceSons;
+
 	// Use this for initialization
 	void Start () {
         alphaPosition = 0.01f;
@@ -36,6 +41,9 @@ public class RailMovementV2 : MonoBehaviour {
         previous = firstRail.GetComponent<RailScriptV2>();
         next = previous.nextRail.GetComponent<RailScriptV2>();
         transform.position = firstRail.position;
+
+        timerSound = 0f;
+        iteratorTimer = 0;
         
     }
 	
@@ -45,6 +53,7 @@ public class RailMovementV2 : MonoBehaviour {
         {
             if (!intersection.isBlocked)
             {
+                playSoundsRails();
                 if (!needDeathPoint)
                 {
                     if(Input.GetAxis("Vertical") != 0)
@@ -281,4 +290,16 @@ public class RailMovementV2 : MonoBehaviour {
         }
         isOnIntersection = false;
     }
+
+    private void playSoundsRails()
+    {
+        timerSound += Time.deltaTime;
+        if(timerSound > frequenceSons)
+        {
+            timerSound = 0f;
+            intersection.playNextRailSound();
+        }
+        
+    }
+
 }

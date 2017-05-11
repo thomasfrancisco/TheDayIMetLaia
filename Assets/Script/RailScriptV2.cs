@@ -15,21 +15,30 @@ public class RailScriptV2 : MonoBehaviour {
     public AigPosition aigPosition;
     public bool oneWay; //Ne bloque pas le joueur si il passe dessus
 
-
+    private AudioSource source;
     private RailScriptV2[] aig1;
     private RailScriptV2[] aig2;
 
-
+    //Pour jouer les sons sur un aiguillage
+    private RailScriptV2[] allRails;
+    private int itRails;
 
 
     // Use this for initialization
     void Start() {
         isSelected = false;
         ArrayList tmp = new ArrayList();
+        ArrayList tmpAllRails = new ArrayList();
         if (previousRail != null)
+        {
             tmp.Add(previousRail.GetComponent<RailScriptV2>());
+            tmpAllRails.Add(previousRail.GetComponent<RailScriptV2>());
+        }
         if (nextRail != null)
+        {
             tmp.Add(nextRail.GetComponent<RailScriptV2>());
+            tmpAllRails.Add(nextRail.GetComponent<RailScriptV2>());
+        }
 
         aig1 = (RailScriptV2[])tmp.ToArray(typeof(RailScriptV2));
 
@@ -37,13 +46,22 @@ public class RailScriptV2 : MonoBehaviour {
         tmp.Clear();
 
         if (thirdRail != null)
+        {
             tmp.Add(thirdRail.GetComponent<RailScriptV2>());
+            tmpAllRails.Add(thirdRail.GetComponent<RailScriptV2>());
+        }
         if (fourthRail != null)
+        {
             tmp.Add(fourthRail.GetComponent<RailScriptV2>());
+            tmpAllRails.Add(fourthRail.GetComponent<RailScriptV2>());
+        }
+
         aig2 = (RailScriptV2[])tmp.ToArray(typeof(RailScriptV2));
-        
-        
+        allRails = (RailScriptV2[])tmpAllRails.ToArray(typeof(RailScriptV2));
+
         aigPosition = AigPosition.aig1;
+        itRails = 0;
+        source = GetComponent<AudioSource>();
 
 
 
@@ -127,7 +145,18 @@ public class RailScriptV2 : MonoBehaviour {
             return aig2;
         }
     }
-	
+
+    public void playNextRailSound()
+    {
+        allRails[itRails].playMySound();
+        itRails = (itRails + 1) % allRails.Length;
+    }
+
+    public void playMySound()
+    {
+        source.Play();
+    }
+
 	// Update is called once per frame
 	void Update () {
 		
