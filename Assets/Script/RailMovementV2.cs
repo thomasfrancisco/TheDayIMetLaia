@@ -31,7 +31,8 @@ public class RailMovementV2 : MonoBehaviour {
     public float frequenceSons;
 
     //Autre source sonore correspondant au corp d'UGO
-    private AudioSource chocSource;
+    private SonChoc sonCollision;
+    private SonAiguillage sonAiguillage;
 
 	// Use this for initialization
 	void Start () {
@@ -42,12 +43,13 @@ public class RailMovementV2 : MonoBehaviour {
         needDeathPoint = false;
 
         previous = firstRail.GetComponent<RailScriptV2>();
-        next = previous.nextRail.GetComponent<RailScriptV2>();
+        next = previous.allRails[0];
         transform.position = firstRail.position;
 
         timerSound = 0f;
 
-        chocSource = transform.FindChild("Choc").GetComponent<AudioSource>();
+        sonCollision = transform.FindChild("Choc").GetComponent<SonChoc>();
+        sonAiguillage = transform.FindChild("Aiguillage").GetComponent<SonAiguillage>();
         
     }
 	
@@ -58,11 +60,13 @@ public class RailMovementV2 : MonoBehaviour {
             if (!intersection.isBlocked)
             {
                 playSoundsRails();
+                sonAiguillage.playIntersection();
                 if (!needDeathPoint)
                 {
                     if(Input.GetAxis("Vertical") != 0)
                     {
                         nextTrack();
+                        sonAiguillage.reset();
                     } else if(Input.GetButtonDown("Fire1") || Input.inputString == "\n")
                     {
                         updateAiguillage();
@@ -90,7 +94,7 @@ public class RailMovementV2 : MonoBehaviour {
         }
 	}
 
-
+    
     //Met a jour l'aiguillage
     private void updateAiguillage()
     {
@@ -187,12 +191,14 @@ public class RailMovementV2 : MonoBehaviour {
                 updateMovementState(0f, false);
             } else
             {
+                //Cas d'un rail "OneWay"
                 if (!previous.isBlocked)
                 {
                     next = previous;
                     previous = previous.getRailAiguillage()[1];
                     alphaPosition = 0.99f;
                 }
+                
             }
         } else if (alphaPosition > 1)
         {
@@ -204,12 +210,14 @@ public class RailMovementV2 : MonoBehaviour {
                 updateMovementState(0f, false);
             } else
             {
+                //Cas d'un rail "OneWay"
                 if (!next.isBlocked)
                 {
                     previous = next;
                     next = next.getRailAiguillage()[0];
                     alphaPosition = 0.01f;
                 }
+                
             }
         }
     }
@@ -293,10 +301,7 @@ public class RailMovementV2 : MonoBehaviour {
             alphaPosition -= (speed / Vector3.Distance(previous.transform.position, next.transform.position)) * Time.deltaTime;
         }
         isOnIntersection = false;
-        if (!chocSource.isPlaying)
-        {
-            chocSource.Play();
-        }
+        sonCollision.playCollision();
     }
 
     //Joue les sons des voies empruntables lorsqu'on est sur une intersection

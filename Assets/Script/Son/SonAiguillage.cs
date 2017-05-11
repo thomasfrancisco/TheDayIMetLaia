@@ -4,16 +4,19 @@ using UnityEngine;
 
 public class SonAiguillage : MonoBehaviour {
 
-    public AudioClip aigActivation;
+    public AudioClip activationSound;
+    public AudioClip intersectionSound;
 
     private AudioSource source;
 
+    private bool hasPlayed;
 
     private void Awake()
     {
         source = GetComponent<AudioSource>();
         source.playOnAwake = false;
         source.loop = false;
+        hasPlayed = false;
     }
     // Use this for initialization
     void Start () {
@@ -25,9 +28,24 @@ public class SonAiguillage : MonoBehaviour {
 		
 	}
 
+    public void playIntersection()
+    {
+        if (!hasPlayed)
+        {
+            hasPlayed = true;
+            source.clip = intersectionSound;
+            source.Play();
+        }
+    }
+
+    public void reset()
+    {
+        hasPlayed = false;
+    }
+
     public void playActivation()
     {
-        source.clip = aigActivation;
+        source.clip = activationSound;
         source.Play();
     }
 }

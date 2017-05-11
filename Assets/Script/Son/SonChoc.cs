@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class SonChoc : MonoBehaviour {
 
+    public AudioClip collisionSound;
+
     private AudioSource source;
 
 	// Use this for initialization
@@ -18,8 +20,12 @@ public class SonChoc : MonoBehaviour {
 		
 	}
 
-    public void playSound()
+    public void playCollision()
     {
-        source.Play();
+        if (!source.isPlaying)
+        {
+            source.clip = collisionSound;
+            source.Play();
+        }
     }
 }

@@ -102,24 +102,24 @@ public class windowsRailCreationV2 : EditorWindow {
     private void setIntersection(GameObject current)
     {
         RailScriptV2 script = lastObject.GetComponent<RailScriptV2>();
-        if (script.nextRail == null)
+        if (script.southRail == null)
         {
-            script.nextRail = current.transform;
+            script.southRail = current.transform;
         }
-        else if (script.thirdRail == null)
+        else if (script.eastRail == null)
         {
-            script.thirdRail = current.transform;
+            script.eastRail = current.transform;
         }
         else
         {
-            if (script.fourthRail != null)
+            if (script.westRail != null)
             {
-                Undo.DestroyObjectImmediate(script.fourthRail.gameObject);
+                Undo.DestroyObjectImmediate(script.westRail.gameObject);
             }
-            script.fourthRail = current.transform;
+            script.westRail = current.transform;
         }
 
         script = current.GetComponent<RailScriptV2>();
-        script.previousRail = lastObject;
+        script.northRail = lastObject;
     }
 }
