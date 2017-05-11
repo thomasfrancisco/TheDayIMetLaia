@@ -28,7 +28,6 @@ public class RailMovementV2 : MonoBehaviour {
 
     //Timer pour jouer les sons
     private float timerSound;
-    private int iteratorTimer;
     public float frequenceSons;
 
     //Autre source sonore correspondant au corp d'UGO
@@ -47,7 +46,6 @@ public class RailMovementV2 : MonoBehaviour {
         transform.position = firstRail.position;
 
         timerSound = 0f;
-        iteratorTimer = 0;
 
         chocSource = transform.FindChild("Choc").GetComponent<AudioSource>();
         
@@ -301,6 +299,7 @@ public class RailMovementV2 : MonoBehaviour {
         }
     }
 
+    //Joue les sons des voies empruntables lorsqu'on est sur une intersection
     private void playSoundsRails()
     {
         timerSound += Time.deltaTime;
