@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SonMoteur : MonoBehaviour {
 
-    private enum UgoState { forward, backward, none};
+    public enum UgoState { forward, backward, none, blocked};
 
     public AudioClip moveForwardStart;
     public AudioClip moveForwardLoop;
@@ -14,8 +14,15 @@ public class SonMoteur : MonoBehaviour {
     public AudioClip moveBackwardLoop;
     public AudioClip moveBackwardEnd;
 
+    public AudioClip moveBlockedStart;
+    public AudioClip moveBlockedLoop;
+    public AudioClip moveBlockedEnd;
+
+    public Animator animatorUgoMotor;
     
-    public string currentlyPlaying;
+    //Debug
+    public string DEBUGCurrentlyPlaying;
+    public string DEBUGSample;
 
     private AudioSource source;
     private RailMovementV2 UgoMovementScript;
@@ -24,6 +31,7 @@ public class SonMoteur : MonoBehaviour {
     private UgoState ugoState;
     private bool lastUgoForwardState;
     private bool lastUgoBackwardState;
+    private bool lastUgoBlockedState;
     private float timeLoop;
     private float minTimeToEnd = 0.5f; //Temps minimum de loop requis pour déclencher le son de fin 
 
@@ -34,6 +42,7 @@ public class SonMoteur : MonoBehaviour {
         source = GetComponent<AudioSource>();
         lastUgoForwardState = false;
         lastUgoBackwardState = false;
+        lastUgoBlockedState = false;
         ugoState = UgoState.none;
     }
 
@@ -44,14 +53,24 @@ public class SonMoteur : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-
         
+        blockedSound();
         forwardSound();
         backwardSound();
 
+        if (source.clip != null)
+        {
+            DEBUGCurrentlyPlaying = source.clip.name;
+            DEBUGSample = source.timeSamples + "/" + source.clip.samples;
+        }
+
         lastUgoForwardState = UgoMovementScript.isMovingForward;
         lastUgoBackwardState = UgoMovementScript.isMovingBackward;
+        lastUgoBlockedState = UgoMovementScript.isMovingBlocked;
+        
+        
 	}
+    
 
     //S'enclenche lorsque Ugo se déplace vers l'avant
     void forwardSound()
@@ -61,7 +80,6 @@ public class SonMoteur : MonoBehaviour {
             ugoState = UgoState.forward;
             //Debut
             source.clip = moveForwardStart;
-            currentlyPlaying = "MoveForwardStart";
             source.loop = false;
             source.Play();
             timeLoop = 0f;
@@ -78,7 +96,6 @@ public class SonMoteur : MonoBehaviour {
                 {
                     //MoveForwardStart fini
                     source.clip = moveForwardLoop;
-                    currentlyPlaying = "MoveForwardLoop";
                     source.loop = true;
                     source.Play();
                 }
@@ -93,7 +110,6 @@ public class SonMoteur : MonoBehaviour {
                 if (timeLoop > minTimeToEnd)
                 {
                     source.clip = moveForwardEnd;
-                    currentlyPlaying = "MoveForwardEnd";
                     source.loop = false;
                     source.Play();
                     ugoState = UgoState.none;
@@ -114,7 +130,6 @@ public class SonMoteur : MonoBehaviour {
             ugoState = UgoState.backward;
             //Debut
             source.clip = moveBackwardStart;
-            currentlyPlaying = "MoveBackwardStart";
             source.loop = false;
             source.Play();
             timeLoop = 0f;
@@ -129,7 +144,6 @@ public class SonMoteur : MonoBehaviour {
                 if(source.timeSamples == source.clip.samples)
                 {
                     source.clip = moveBackwardLoop;
-                    currentlyPlaying = "MoveBackwardLoop";
                     source.loop = true;
                     source.Play();
                 }
@@ -143,7 +157,6 @@ public class SonMoteur : MonoBehaviour {
                 if(timeLoop > minTimeToEnd)
                 {
                     source.clip = moveBackwardEnd;
-                    currentlyPlaying = "MoveBackwardEnd";
                     source.loop = false;
                     source.Play();
                     ugoState = UgoState.none;
@@ -155,4 +168,52 @@ public class SonMoteur : MonoBehaviour {
         }
     }
     
+    //S'enclenche lorsqu'Ugo est bloqué
+    void blockedSound()
+    {
+        if ((UgoMovementScript.isMovingBlocked && lastUgoBlockedState && ugoState == UgoState.blocked)
+            || (lastUgoBackwardState || lastUgoForwardState) && UgoMovementScript.isMovingBlocked)
+        {
+            //Loop
+            ugoState = UgoState.blocked;
+            timeLoop += Time.deltaTime;
+            if ((source.clip == moveBlockedStart && source.timeSamples == source.clip.samples)
+                || source.clip == moveBackwardLoop || source.clip == moveForwardLoop)
+            {
+                source.clip = moveBlockedLoop;
+                source.loop = true;
+                source.Play();
+            }
+
+        }
+        else if (UgoMovementScript.isMovingBlocked && !lastUgoBlockedState)
+        {
+            ugoState = UgoState.blocked;
+            //Debut
+            source.clip = moveBlockedStart;
+            source.loop = false;
+            source.Play();
+            timeLoop = 0f;
+
+        }
+        
+        else if (!UgoMovementScript.isMovingBlocked && !lastUgoBlockedState && ugoState == UgoState.blocked)
+        {
+            //End
+            if (source.clip == moveBlockedStart || source.clip == moveBlockedLoop)
+            {
+                if (timeLoop > minTimeToEnd)
+                {
+                    source.clip = moveBlockedEnd;
+                    source.loop = false;
+                    source.Play();
+                    ugoState = UgoState.none;
+                }
+                else
+                {
+                    source.Stop();
+                }
+            }
+        }
+    }
 }

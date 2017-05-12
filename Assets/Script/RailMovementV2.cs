@@ -17,11 +17,14 @@ public class RailMovementV2 : MonoBehaviour {
     public bool isMovingForward;
     [HideInInspector]
     public bool isMovingBackward;
+    [HideInInspector]
+    public bool isMovingBlocked;
 
     private RailScriptV2 previous;
     private RailScriptV2 next;
 
-    private float alphaPosition;
+    public float alphaPosition;  
+
     private bool isOnIntersection;
     private RailScriptV2 intersection;
     private bool needDeathPoint;
@@ -65,8 +68,8 @@ public class RailMovementV2 : MonoBehaviour {
                 {
                     if(Input.GetAxis("Vertical") != 0)
                     {
-                        nextTrack();
-                        sonAiguillage.reset();
+                        if(nextTrack())
+                            sonAiguillage.reset();
                     } else if(Input.GetButtonDown("Fire1") || Input.inputString == "\n")
                     {
                         updateAiguillage();
@@ -74,11 +77,14 @@ public class RailMovementV2 : MonoBehaviour {
                     
                 } else
                 {
+                    updateMovementState(0f, false);
                     if (Input.GetAxis("Vertical") == 0) needDeathPoint = false;
                 }
             } else
             {
-                cancelMovement();
+                if (!nextTrack())
+                    cancelMovement();
+                
             }
         } else
         {
@@ -120,19 +126,21 @@ public class RailMovementV2 : MonoBehaviour {
     }
 
     //Place le joueur sur la nouvelle voie
-    private void nextTrack()
+    private bool nextTrack()
     {
         RailScriptV2[] choiceIntersection = intersection.getRailAiguillage();
         if(Input.GetAxis("Vertical") > 0)
         {
             if (choiceIntersection.Length > 0)
             {
+                Debug.Log(getAngleWithObject(choiceIntersection[0].transform) + " < " + angleIntersection);
                 if (getAngleWithObject(choiceIntersection[0].transform) < angleIntersection)
                 {
                     previous = intersection;
                     next = choiceIntersection[0];
                     isOnIntersection = false;
                     alphaPosition = 0.01f;
+                    return true;
                 }
             }
             if (choiceIntersection.Length > 1)
@@ -143,31 +151,36 @@ public class RailMovementV2 : MonoBehaviour {
                     next = choiceIntersection[1];
                     isOnIntersection = false;
                     alphaPosition = 0.01f;
+                    return true;
                 }
             }
         } else if(Input.GetAxis("Vertical") < 0)
         {
             if (choiceIntersection.Length > 0)
             {
-                if (getAngleWithObject(choiceIntersection[0].transform) < angleIntersection)
+                Debug.Log(getAngleWithObject(choiceIntersection[0].transform) + " < " + angleIntersection);
+                if (getAngleWithObject(choiceIntersection[0].transform, true)<  angleIntersection)
                 {
-                    previous = choiceIntersection[1];
+                    previous = choiceIntersection[0];
                     next = intersection;
                     isOnIntersection = false;
                     alphaPosition = 0.99f;
+                    return true;
                 }
             }
             if (choiceIntersection.Length > 1)
             {
-                if (getAngleWithObject(choiceIntersection[1].transform) < angleIntersection)
+                if (getAngleWithObject(choiceIntersection[1].transform, true)< angleIntersection)
                 {
                     previous = choiceIntersection[1];
                     next = intersection;
                     isOnIntersection = false;
                     alphaPosition = 0.99f;
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     //Mouvement classique entre deux voies
@@ -188,15 +201,17 @@ public class RailMovementV2 : MonoBehaviour {
                 intersection = previous;
                 isOnIntersection = true;
                 needDeathPoint = true;
-                updateMovementState(0f, false);
             } else
             {
                 //Cas d'un rail "OneWay"
                 if (!previous.isBlocked)
                 {
-                    next = previous;
-                    previous = previous.getRailAiguillage()[1];
-                    alphaPosition = 0.99f;
+                    if (previous.getRailAiguillage().Length > 1)
+                    {
+                        next = previous;
+                        previous = previous.getRailAiguillage()[1];
+                        alphaPosition = 0.99f;
+                    }
                 }
                 
             }
@@ -207,15 +222,17 @@ public class RailMovementV2 : MonoBehaviour {
                 intersection = next;
                 isOnIntersection = true;
                 needDeathPoint = true;
-                updateMovementState(0f, false);
             } else
             {
                 //Cas d'un rail "OneWay"
                 if (!next.isBlocked)
                 {
-                    previous = next;
-                    next = next.getRailAiguillage()[0];
-                    alphaPosition = 0.01f;
+                    if (next.getRailAiguillage().Length > 1)
+                    {
+                        previous = next;
+                        next = next.getRailAiguillage()[0];
+                        alphaPosition = 0.01f;
+                    }
                 }
                 
             }
@@ -223,9 +240,12 @@ public class RailMovementV2 : MonoBehaviour {
     }
 
     //Retourne l'angle entre le vecteur de la camera et l'objet
-    private float getAngleWithObject(Transform target)
+    private float getAngleWithObject(Transform target, bool isBack = false)
     {
-        return Vector3.Angle(target.position - Camera.main.transform.position, Camera.main.transform.forward);
+        if (!isBack)
+            return Vector3.Angle(target.position - Camera.main.transform.position, Camera.main.transform.forward);
+        else
+            return Vector3.Angle(target.position - Camera.main.transform.position, Camera.main.transform.forward * -1);
     }
 
     //Met a jour les variables de déplacements (Pour le son)
@@ -237,16 +257,19 @@ public class RailMovementV2 : MonoBehaviour {
             {
                 isMovingForward = true;
                 isMovingBackward = false;
+                isMovingBlocked = false;
             }
             else
             {
-                isMovingForward = false;
                 isMovingBackward = true;
+                isMovingForward = false;
+                isMovingBlocked = false;
             }
         } else
         {
             isMovingBackward = false;
             isMovingForward = false;
+            isMovingBlocked = false;
         }
     }
 
@@ -261,12 +284,10 @@ public class RailMovementV2 : MonoBehaviour {
             if(angleSecondElement < angleMaxDirection)
             {
                 updateMovementState(verticalAxis, true);
-                //return verticalAxis * speed * Time.deltaTime;
                 return verticalAxis * (speed / Vector3.Distance(previous.transform.position, next.transform.position)) * Time.deltaTime;
             } else if (angleNextElement < angleMaxDirection)
             {
                 updateMovementState(verticalAxis, true);
-                //return verticalAxis * speed * Time.deltaTime * -1;
                 return verticalAxis * (speed / Vector3.Distance(previous.transform.position, next.transform.position)) * Time.deltaTime * -1;
             } else
             {
@@ -292,16 +313,10 @@ public class RailMovementV2 : MonoBehaviour {
     //Annule un mouvement en cas de collision avec une bordure
     private void cancelMovement()
     {
-        updateMovementState(0f, false);
-        if(alphaPosition < 0)
-        {
-            alphaPosition += (speed / Vector3.Distance(previous.transform.position, next.transform.position)) * Time.deltaTime;
-        } else
-        {
-            alphaPosition -= (speed / Vector3.Distance(previous.transform.position, next.transform.position)) * Time.deltaTime;
-        }
-        isOnIntersection = false;
-        sonCollision.playCollision();
+        if (Input.GetAxis("Vertical") != 0)
+            isMovingBlocked = true;
+        else
+            isMovingBlocked = false;
     }
 
     //Joue les sons des voies empruntables lorsqu'on est sur une intersection

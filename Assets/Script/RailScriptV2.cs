@@ -2,64 +2,80 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum RailPosition { North, East, South, West};
+
+
 public class RailScriptV2 : MonoBehaviour {
 
     public enum AigPosition { aig1, aig2 };
 
-    public Transform previousRail;
-    public Transform nextRail;
-    public Transform thirdRail;
-    public Transform fourthRail;
+    public Transform northRail;
+    public Transform southRail;
+    public Transform eastRail;
+    public Transform westRail;
     public bool isBlocked;
     public bool isSelected;
     public AigPosition aigPosition;
     public bool oneWay; //Ne bloque pas le joueur si il passe dessus
+
+    public AudioClip northSound;
+    public AudioClip eastSound;
+    public AudioClip southSound;
+    public AudioClip westSound;
 
     private AudioSource source;
     private RailScriptV2[] aig1;
     private RailScriptV2[] aig2;
 
     //Pour jouer les sons sur un aiguillage
-    private RailScriptV2[] allRails;
+    [HideInInspector]
+    public RailScriptV2[] allRails;
+    private RailPosition[] allRailsPosition;
     private int itRails;
+    private int emptyHit = 2;
 
 
     // Use this for initialization
-    void Start() {
+    void Awake() {
         isSelected = false;
-        ArrayList tmp = new ArrayList();
+        ArrayList tmpAig1 = new ArrayList();
+        ArrayList tmpAig2 = new ArrayList();
         ArrayList tmpAllRails = new ArrayList();
-        if (previousRail != null)
+        ArrayList tmpPositions = new ArrayList();
+        if (northRail != null)
         {
-            tmp.Add(previousRail.GetComponent<RailScriptV2>());
-            tmpAllRails.Add(previousRail.GetComponent<RailScriptV2>());
-        }
-        if (nextRail != null)
-        {
-            tmp.Add(nextRail.GetComponent<RailScriptV2>());
-            tmpAllRails.Add(nextRail.GetComponent<RailScriptV2>());
+            tmpAig1.Add(northRail.GetComponent<RailScriptV2>());
+            tmpAllRails.Add(northRail.GetComponent<RailScriptV2>());
+            tmpPositions.Add(RailPosition.North);
         }
 
-        aig1 = (RailScriptV2[])tmp.ToArray(typeof(RailScriptV2));
-
-
-        tmp.Clear();
-
-        if (thirdRail != null)
+        if (eastRail != null)
         {
-            tmp.Add(thirdRail.GetComponent<RailScriptV2>());
-            tmpAllRails.Add(thirdRail.GetComponent<RailScriptV2>());
+            tmpAig2.Add(eastRail.GetComponent<RailScriptV2>());
+            tmpAllRails.Add(eastRail.GetComponent<RailScriptV2>());
+            tmpPositions.Add(RailPosition.East);
         }
-        if (fourthRail != null)
+        if (southRail != null)
         {
-            tmp.Add(fourthRail.GetComponent<RailScriptV2>());
-            tmpAllRails.Add(fourthRail.GetComponent<RailScriptV2>());
+            tmpAig1.Add(southRail.GetComponent<RailScriptV2>());
+            tmpAllRails.Add(southRail.GetComponent<RailScriptV2>());
+            tmpPositions.Add(RailPosition.South);
         }
 
-        aig2 = (RailScriptV2[])tmp.ToArray(typeof(RailScriptV2));
+
+        
+        if (westRail != null)
+        {
+            tmpAig2.Add(westRail.GetComponent<RailScriptV2>());
+            tmpAllRails.Add(westRail.GetComponent<RailScriptV2>());
+            tmpPositions.Add(RailPosition.West);
+        }
+
+        aig1 = (RailScriptV2[])tmpAig1.ToArray(typeof(RailScriptV2));
+        aig2 = (RailScriptV2[])tmpAig2.ToArray(typeof(RailScriptV2));
         allRails = (RailScriptV2[])tmpAllRails.ToArray(typeof(RailScriptV2));
-
-        aigPosition = AigPosition.aig1;
+        allRailsPosition = (RailPosition[])tmpPositions.ToArray(typeof(RailPosition));
+        
         itRails = 0;
         source = GetComponent<AudioSource>();
 
@@ -82,27 +98,52 @@ public class RailScriptV2 : MonoBehaviour {
         else
             Gizmos.DrawWireSphere(transform.position, .1f);
 
-        if(previousRail != null)
+        if(northRail != null)
         {
-                Gizmos.color = Color.green;
-            Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, previousRail.position, 0.5f));
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, northRail.position, 0.5f));
         }
         
-        if(nextRail != null)
+        if(southRail != null)
         {
-                Gizmos.color = Color.green;
-            Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, nextRail.position, 0.5f));
-            
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, southRail.position, 0.5f));
         }
-        if(thirdRail != null)
+        if(eastRail != null)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, thirdRail.position, 0.5f));
+            Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, eastRail.position, 0.5f));
         }
-        if(fourthRail != null)
+        if(westRail != null)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, fourthRail.position, 0.5f));
+            Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, westRail.position, 0.5f));
+        }
+
+        if(aigPosition == AigPosition.aig1)
+        {
+            Gizmos.color = Color.green;
+            if (northRail)
+                Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, northRail.position, 0.5f));
+            if (southRail)
+                Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, southRail.position, 0.5f));
+            Gizmos.color = Color.red;
+            if (eastRail)
+                Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, eastRail.position, 0.5f));
+            if (westRail)
+                Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, westRail.position, 0.5f));
+        } else
+        {
+            Gizmos.color = Color.red;
+            if (northRail)
+                Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, northRail.position, 0.5f));
+            if (southRail)
+                Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, southRail.position, 0.5f));
+            Gizmos.color = Color.green;
+            if (eastRail)
+                Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, eastRail.position, 0.5f));
+            if (westRail)
+                Gizmos.DrawLine(transform.position, Vector3.Lerp(transform.position, westRail.position, 0.5f));
         }
     }
 
@@ -146,14 +187,32 @@ public class RailScriptV2 : MonoBehaviour {
         }
     }
 
+    //Fais sonner les autres voies une par une
     public void playNextRailSound()
     {
-        allRails[itRails].playMySound();
-        itRails = (itRails + 1) % allRails.Length;
+        if(itRails < allRails.Length)
+            allRails[itRails].playMySound(allRailsPosition[itRails]);
+
+        itRails = (itRails + 1) % (allRails.Length + emptyHit);
     }
 
-    public void playMySound()
+    public void playMySound(RailPosition railPosition)
     {
+        switch (railPosition)
+        {
+            case RailPosition.North:
+                source.clip = northSound;
+                break;
+            case RailPosition.South:
+                source.clip = southSound;
+                break;
+            case RailPosition.East:
+                source.clip = eastSound;
+                break;
+            case RailPosition.West:
+                source.clip = westSound;
+                break;
+        }
         source.Play();
     }
 
