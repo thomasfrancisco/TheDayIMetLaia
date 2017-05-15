@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class SonRoue : MonoBehaviour {
-
-    public AudioClip roueMarcheAV;
-    public AudioClip roueMarcheAR;
-    public AudioClip roueMarcheAVForce;
-    public AudioClip roueMarcheARForce;
+    private AudioSource source;
     public AudioClip roueDemiTour;
 
 
-	// Use this for initialization
-	void Start () {
+    private void Awake()
+    {
+        source = GetComponent<AudioSource>();
+        source.playOnAwake = false;
+        source.loop = false;
+    }
+
+    // Use this for initialization
+    void Start () {
 		
 	}
 	
@@ -20,4 +23,10 @@ public class SonRoue : MonoBehaviour {
 	void Update () {
 		
 	}
+
+    public void playSoundDemiTour()
+    {
+        source.clip = roueDemiTour;
+        source.Play();
+    }
 }

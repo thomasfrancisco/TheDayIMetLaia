@@ -7,12 +7,20 @@ public class SonChoc : MonoBehaviour {
     public AudioClip collisionSound;
 
     private AudioSource source;
+    public float frequencyHit;
+    private float timer;
 
-	// Use this for initialization
-	void Start () {
+
+    private void Awake()
+    {
+        timer = 0f;
         source = GetComponent<AudioSource>();
         source.playOnAwake = false;
         source.loop = false;
+    }
+    // Use this for initialization
+    void Start () {
+        
 	}
 	
 	// Update is called once per frame
@@ -24,8 +32,21 @@ public class SonChoc : MonoBehaviour {
     {
         if (!source.isPlaying)
         {
-            source.clip = collisionSound;
-            source.Play();
+            
+            if (timer == 0)
+            {
+                source.clip = collisionSound;
+                source.Play();
+            }
+            timer += Time.deltaTime;
+            if (timer > frequencyHit)
+                timer = 0f;
+            
         }
+    }
+
+    public void resetCollision()
+    {
+        timer = 0f;
     }
 }

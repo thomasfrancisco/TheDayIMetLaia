@@ -26,12 +26,12 @@ public class SonMoteur : MonoBehaviour {
     private RailMovementV2 UgoMovementScript;
 
 
-    private UgoState ugoState;
-    private bool lastUgoForwardState;
-    private bool lastUgoBackwardState;
-    private bool lastUgoBlockedState;
-    private float timeLoop;
-    private float minTimeToEnd = 0.5f; //Temps minimum de loop requis pour déclencher le son de fin 
+    public UgoState ugoState;
+    public bool lastUgoForwardState;
+    public bool lastUgoBackwardState;
+    public bool lastUgoBlockedState;
+    public float timeLoop;
+    public float minTimeToEnd = 0.5f; //Temps minimum de loop requis pour déclencher le son de fin 
 
     private void Awake()
     {
@@ -55,12 +55,14 @@ public class SonMoteur : MonoBehaviour {
         blockedSound();
         forwardSound();
         backwardSound();
-
+        
+        // DEBUG
         if (source.clip != null)
         {
             DEBUGCurrentlyPlaying = source.clip.name;
             DEBUGSample = source.timeSamples + "/" + source.clip.samples;
         }
+        
 
         lastUgoForwardState = UgoMovementScript.isMovingForward;
         lastUgoBackwardState = UgoMovementScript.isMovingBackward;
@@ -90,7 +92,7 @@ public class SonMoteur : MonoBehaviour {
             if (source.clip == moveForwardStart)
             {
                 //On laisse le temps de se finir
-                if (source.timeSamples == source.clip.samples)
+                if (source.timeSamples > source.clip.samples -5)
                 {
                     //MoveForwardStart fini
                     source.clip = moveForwardLoop;
@@ -139,7 +141,7 @@ public class SonMoteur : MonoBehaviour {
             if(source.clip == moveBackwardStart)
             {
                 //Laisse finir
-                if(source.timeSamples == source.clip.samples)
+                if(source.timeSamples > source.clip.samples -5)
                 {
                     source.clip = moveBackwardLoop;
                     source.loop = true;
@@ -175,7 +177,7 @@ public class SonMoteur : MonoBehaviour {
             //Loop
             ugoState = UgoState.blocked;
             timeLoop += Time.deltaTime;
-            if ((source.clip == moveBlockedStart && source.timeSamples == source.clip.samples)
+            if ((source.clip == moveBlockedStart && source.timeSamples > source.clip.samples -5)
                 || source.clip == moveBackwardLoop || source.clip == moveForwardLoop)
             {
                 source.clip = moveBlockedLoop;

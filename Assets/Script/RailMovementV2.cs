@@ -36,6 +36,13 @@ public class RailMovementV2 : MonoBehaviour {
     //Autre source sonore correspondant au corp d'UGO
     private SonChoc sonCollision;
     private SonAiguillage sonAiguillage;
+    private SonRoue sonRoue;
+    [HideInInspector]
+    public bool doAction;
+    private SonAction sonAction;
+
+    //Permet de connaître la direction du joueur, et de déclencher un son s'il se retourne
+    //private Transform lookingAt;
 
 	// Use this for initialization
 	void Start () {
@@ -44,6 +51,7 @@ public class RailMovementV2 : MonoBehaviour {
         isMovingBackward = false;
         isOnIntersection = false;
         needDeathPoint = false;
+        doAction = false;
 
         previous = firstRail.GetComponent<RailScriptV2>();
         next = previous.allRails[0];
@@ -53,11 +61,15 @@ public class RailMovementV2 : MonoBehaviour {
 
         sonCollision = transform.FindChild("Choc").GetComponent<SonChoc>();
         sonAiguillage = transform.FindChild("Aiguillage").GetComponent<SonAiguillage>();
+        sonRoue = transform.FindChild("Roues").GetComponent<SonRoue>();
+        sonAction = transform.FindChild("Action").GetComponent<SonAction>();
         
     }
 	
 	// Update is called once per frame
 	void Update () {
+        if (Input.GetButtonDown("Fire1") || Input.inputString == "\n")
+            doAction = true;
         if (isOnIntersection)
         {
             if (!intersection.isBlocked)
@@ -68,10 +80,14 @@ public class RailMovementV2 : MonoBehaviour {
                 {
                     if(Input.GetAxis("Vertical") != 0)
                     {
-                        if(nextTrack())
+                        if (nextTrack())
+                        {
                             sonAiguillage.reset();
+                            sonAiguillage.playDecroche();
+                        }
                     } else if(Input.GetButtonDown("Fire1") || Input.inputString == "\n")
                     {
+                        doAction = false;
                         updateAiguillage();
                     }
                     
@@ -133,7 +149,6 @@ public class RailMovementV2 : MonoBehaviour {
         {
             if (choiceIntersection.Length > 0)
             {
-                Debug.Log(getAngleWithObject(choiceIntersection[0].transform) + " < " + angleIntersection);
                 if (getAngleWithObject(choiceIntersection[0].transform) < angleIntersection)
                 {
                     previous = intersection;
@@ -158,7 +173,6 @@ public class RailMovementV2 : MonoBehaviour {
         {
             if (choiceIntersection.Length > 0)
             {
-                Debug.Log(getAngleWithObject(choiceIntersection[0].transform) + " < " + angleIntersection);
                 if (getAngleWithObject(choiceIntersection[0].transform, true)<  angleIntersection)
                 {
                     previous = choiceIntersection[0];
@@ -186,8 +200,8 @@ public class RailMovementV2 : MonoBehaviour {
     //Mouvement classique entre deux voies
     private void move()
     {
-        transform.position = Vector3.Lerp(previous.transform.position, next.transform.position, alphaPosition);
         alphaPosition += newAlphaPosition();
+        transform.position = Vector3.Lerp(previous.transform.position, next.transform.position, alphaPosition);
 
     }
 
@@ -267,9 +281,10 @@ public class RailMovementV2 : MonoBehaviour {
             }
         } else
         {
-            isMovingBackward = false;
-            isMovingForward = false;
             isMovingBlocked = false;
+            isMovingForward = false;
+            isMovingBackward = false;
+
         }
     }
 
@@ -277,46 +292,54 @@ public class RailMovementV2 : MonoBehaviour {
     private float newAlphaPosition()
     {
         float verticalAxis = Input.GetAxis("Vertical");
-        if(verticalAxis != 0)
+        float angleNextElement = getAngleWithObject(previous.transform);
+        float angleSecondElement = getAngleWithObject(next.transform);
+        
+        if(angleSecondElement < angleMaxDirection)
         {
-            float angleNextElement = getAngleWithObject(previous.transform);
-            float angleSecondElement = getAngleWithObject(next.transform);
-            if(angleSecondElement < angleMaxDirection)
+            if (verticalAxis != 0)
             {
                 updateMovementState(verticalAxis, true);
                 return verticalAxis * (speed / Vector3.Distance(previous.transform.position, next.transform.position)) * Time.deltaTime;
-            } else if (angleNextElement < angleMaxDirection)
+            }
+        } else if(angleNextElement < angleMaxDirection)
+        {
+            if(verticalAxis != 0)
             {
                 updateMovementState(verticalAxis, true);
                 return verticalAxis * (speed / Vector3.Distance(previous.transform.position, next.transform.position)) * Time.deltaTime * -1;
-            } else
-            {
-                updateMovementState(verticalAxis, false);
-                return 0f;
             }
-        } else
-        {
-            updateMovementState(verticalAxis, false);
-            return 0f;
         }
+        updateMovementState(verticalAxis, false);
+        return 0f;
+
     }
 
 
     // Vérifie si la fonction "avancer" ou "reculer" est bien débloqué
     private bool movementUnlocked()
     {
-        return ((Input.GetAxis("Vertical") > 0 && avanceDebloque)
-            || (Input.GetAxis("Vertical") < 0 && reculeDebloque));
+        //Peut etre possible d'éviter ça...
+        return true;
+        //return ((Input.GetAxis("Vertical") > 0 && avanceDebloque)
+          //  || (Input.GetAxis("Vertical") < 0 && reculeDebloque));
 
     }
 
     //Annule un mouvement en cas de collision avec une bordure
     private void cancelMovement()
     {
+        updateMovementState(0f, false);
         if (Input.GetAxis("Vertical") != 0)
+        {
             isMovingBlocked = true;
+            sonCollision.playCollision();
+        }
         else
+        {
             isMovingBlocked = false;
+            sonCollision.resetCollision();
+        }
     }
 
     //Joue les sons des voies empruntables lorsqu'on est sur une intersection

@@ -6,6 +6,7 @@ public class SonAiguillage : MonoBehaviour {
 
     public AudioClip activationSound;
     public AudioClip intersectionSound;
+    public AudioClip decrocheSound;
 
     private AudioSource source;
 
@@ -37,6 +38,13 @@ public class SonAiguillage : MonoBehaviour {
             source.Play();
         }
     }
+
+    public void playDecroche()
+    {
+        source.clip = decrocheSound;
+        source.Play();
+    }
+
 
     public void reset()
     {
