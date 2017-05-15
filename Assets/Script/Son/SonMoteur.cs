@@ -17,9 +17,7 @@ public class SonMoteur : MonoBehaviour {
     public AudioClip moveBlockedStart;
     public AudioClip moveBlockedLoop;
     public AudioClip moveBlockedEnd;
-
-    public Animator animatorUgoMotor;
-    
+        
     //Debug
     public string DEBUGCurrentlyPlaying;
     public string DEBUGSample;
