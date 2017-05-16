@@ -13,7 +13,7 @@ public class RailMovementV2 : MonoBehaviour {
     public bool reculeDebloque;
 
     //boolean pour les sons avancer et reculer
-    [HideInInspector]
+    //[HideInInspector]
     public bool isMovingForward;
     [HideInInspector]
     public bool isMovingBackward;
@@ -28,6 +28,7 @@ public class RailMovementV2 : MonoBehaviour {
     private bool isOnIntersection;
     private RailScriptV2 intersection;
     private bool needDeathPoint;
+    private bool isAigMoving;
 
     //Timer pour jouer les sons
     private float timerSound;
@@ -52,6 +53,7 @@ public class RailMovementV2 : MonoBehaviour {
         isOnIntersection = false;
         needDeathPoint = false;
         doAction = false;
+        isAigMoving = false;
 
         previous = firstRail.GetComponent<RailScriptV2>();
         next = previous.allRails[0];
@@ -78,17 +80,27 @@ public class RailMovementV2 : MonoBehaviour {
                 sonAiguillage.playIntersection();
                 if (!needDeathPoint)
                 {
-                    if(Input.GetAxis("Vertical") != 0)
+                    if (isAigMoving)
                     {
-                        if (nextTrack())
+                        if (sonAiguillage.playMouvement())
                         {
-                            sonAiguillage.reset();
-                            sonAiguillage.playDecroche();
+                            isAigMoving = false;
                         }
-                    } else if(Input.GetButtonDown("Fire1") || Input.inputString == "\n")
+                    }
+                    else
                     {
-                        doAction = false;
-                        updateAiguillage();
+                        if (Input.GetAxis("Vertical") != 0)
+                        {
+                            if (nextTrack())
+                            {
+                                sonAiguillage.reset();
+                                sonAiguillage.playDecroche();
+                            }
+                        }
+                        else if (Input.GetButtonDown("Fire1") || Input.inputString == "\n")
+                        {
+                            updateAiguillage();
+                        }
                     }
                     
                 } else
@@ -126,13 +138,18 @@ public class RailMovementV2 : MonoBehaviour {
             if (getAngleWithObject(choiceUndisposedIntersection[0].transform) < angleIntersection
                 || getAngleWithObject(choiceUndisposedIntersection[1].transform) < angleIntersection)
             {
+                doAction = false;
                 intersection.changeAiguillage();
+                isAigMoving = true;
+
             }
         } else if (choiceUndisposedIntersection.Length == 1)
         {
             if(getAngleWithObject(choiceUndisposedIntersection[0].transform) < angleIntersection)
             {
+                doAction = false;
                 intersection.changeAiguillage();
+                isAigMoving = true;
             }
         } else
         {
@@ -200,8 +217,9 @@ public class RailMovementV2 : MonoBehaviour {
     //Mouvement classique entre deux voies
     private void move()
     {
-        alphaPosition += newAlphaPosition();
+
         transform.position = Vector3.Lerp(previous.transform.position, next.transform.position, alphaPosition);
+        alphaPosition += newAlphaPosition();
 
     }
 

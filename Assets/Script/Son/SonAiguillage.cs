@@ -5,8 +5,10 @@ using UnityEngine;
 public class SonAiguillage : MonoBehaviour {
 
     public AudioClip activationSound;
-    public AudioClip intersectionSound;
+    public AudioClip accrocheSound;
     public AudioClip decrocheSound;
+    public AudioClip validationSound;
+    public AudioClip mouvementSound;
 
     private AudioSource source;
 
@@ -34,9 +36,33 @@ public class SonAiguillage : MonoBehaviour {
         if (!hasPlayed)
         {
             hasPlayed = true;
-            source.clip = intersectionSound;
+            source.clip = accrocheSound;
             source.Play();
         }
+    }
+
+    public bool playMouvement()
+    {
+        if(source.clip == validationSound)
+        {
+            if(source.timeSamples == source.clip.samples)
+            {
+                source.clip = mouvementSound;
+                source.Play();
+            }
+        } else if (source.clip == mouvementSound)
+        {
+            if(source.timeSamples == source.clip.samples)
+            {
+                source.clip = null;
+                return true;
+            }
+        } else
+        {
+            source.clip = validationSound;
+            source.Play();
+        }
+        return false;
     }
 
     public void playDecroche()
