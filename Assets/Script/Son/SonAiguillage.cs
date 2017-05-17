@@ -10,6 +10,7 @@ public class SonAiguillage : MonoBehaviour {
     public AudioClip validationSound;
     public AudioClip mouvementSound;
 
+    
     private AudioSource source;
 
     private bool hasPlayed;
@@ -79,7 +80,7 @@ public class SonAiguillage : MonoBehaviour {
 
     public void playActivation()
     {
-        source.clip = activationSound;
-        source.Play();
+      source.clip = activationSound;
+      source.Play();
     }
 }

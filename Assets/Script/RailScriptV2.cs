@@ -34,10 +34,23 @@ public class RailScriptV2 : MonoBehaviour {
     private int itRails;
     private int emptyHit = 2;
 
+    //Pour trigger les collisions
+    [HideInInspector]
+    public bool isCollided;
+
 
     // Use this for initialization
     void Awake() {
+        connectRails();
         isSelected = false;
+        itRails = 0;
+        source = GetComponent<AudioSource>();
+        
+
+    }
+
+    public void connectRails()
+    {
         ArrayList tmpAig1 = new ArrayList();
         ArrayList tmpAig2 = new ArrayList();
         ArrayList tmpAllRails = new ArrayList();
@@ -63,7 +76,7 @@ public class RailScriptV2 : MonoBehaviour {
         }
 
 
-        
+
         if (westRail != null)
         {
             tmpAig2.Add(westRail.GetComponent<RailScriptV2>());
@@ -75,12 +88,6 @@ public class RailScriptV2 : MonoBehaviour {
         aig2 = (RailScriptV2[])tmpAig2.ToArray(typeof(RailScriptV2));
         allRails = (RailScriptV2[])tmpAllRails.ToArray(typeof(RailScriptV2));
         allRailsPosition = (RailPosition[])tmpPositions.ToArray(typeof(RailPosition));
-        
-        itRails = 0;
-        source = GetComponent<AudioSource>();
-
-
-
     }
     
 

@@ -31,14 +31,19 @@ public class SonSpeaker : MonoBehaviour
     private Puzzle1Script puzzle1Script;
     private RailMovementV2 ugoRailMovement;
     private SonAiguillage sonAiguillage;
+    
 
 
     // Use this for initialization
     void Awake()
     {
+        
         source = GetComponent<AudioSource>();
         source.playOnAwake = false;
         source.loop = false;
+
+        
+
         puzzle1Script = puzzle1.FindChild("Tilt").GetComponent<Puzzle1Script>();
         ugoRailMovement = ugo.GetComponent<RailMovementV2>();
         sonAiguillage = ugo.Find("Aiguillage").GetComponent<SonAiguillage>();

@@ -42,9 +42,6 @@ public class RailMovementV2 : MonoBehaviour {
     public bool doAction;
     private SonAction sonAction;
 
-    //Permet de connaître la direction du joueur, et de déclencher un son s'il se retourne
-    //private Transform lookingAt;
-
 	// Use this for initialization
 	void Start () {
         alphaPosition = 0.01f;
@@ -112,6 +109,8 @@ public class RailMovementV2 : MonoBehaviour {
             {
                 if (!nextTrack())
                     cancelMovement();
+                else
+                    sonCollision.resetCollision();
                 
             }
         } else
@@ -338,9 +337,9 @@ public class RailMovementV2 : MonoBehaviour {
     private bool movementUnlocked()
     {
         //Peut etre possible d'éviter ça...
-        return true;
-        //return ((Input.GetAxis("Vertical") > 0 && avanceDebloque)
-          //  || (Input.GetAxis("Vertical") < 0 && reculeDebloque));
+        //return true;
+        return ((Input.GetAxis("Vertical") > 0 && avanceDebloque)
+            || (Input.GetAxis("Vertical") < 0 && reculeDebloque));
 
     }
 
@@ -351,12 +350,12 @@ public class RailMovementV2 : MonoBehaviour {
         if (Input.GetAxis("Vertical") != 0)
         {
             isMovingBlocked = true;
+            intersection.isCollided = true;
             sonCollision.playCollision();
         }
         else
         {
             isMovingBlocked = false;
-            sonCollision.resetCollision();
         }
     }
 

@@ -17,11 +17,11 @@ public class SonPuzzle1 : MonoBehaviour {
 
     private Puzzle1Script script;
 
-    private bool stopPlayingSignal;
+    public bool stopPlayingSignal;
+    
 
     private void Awake()
     {
-        stopPlayingSignal = false;
         sourceDoor = transform.Find("Son Porte").GetComponent<AudioSource>();
         sourceSignal = transform.Find("Tilt/Signal Electrique").GetComponent<AudioSource>();
         sourceFeedback = transform.Find("Tilt/FeedBack").GetComponent<AudioSource>();
@@ -32,7 +32,7 @@ public class SonPuzzle1 : MonoBehaviour {
     void Start () {
         sourceSignal.clip = electricLoop;
         sourceSignal.loop = true;
-        sourceSignal.playOnAwake = true;
+        sourceSignal.playOnAwake = false;
         sourceSignal.Play();
 
         sourceDoor.loop = false;
@@ -50,7 +50,7 @@ public class SonPuzzle1 : MonoBehaviour {
             if (script.isOnDoor)
             {
                 if(!sourceZoneActive.isPlaying)
-                sourceZoneActive.Play();
+                    sourceZoneActive.Play();
             }
             else
             {

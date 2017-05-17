@@ -7,6 +7,7 @@ public class Puzzle1Script : MonoBehaviour {
     public Transform player;
     public float radiusDetection;
     public Transform relatedBlockedRail;
+    public Transform nextRail;
 
     private Animator tiltAnim;
     private Animator doorAnim;
@@ -18,6 +19,8 @@ public class Puzzle1Script : MonoBehaviour {
     //private bool firstTry;
 
     private SonPuzzle1 scriptSons;
+    private RailScriptV2 relatedScript;
+    private RailScriptV2 nextRailScript;
 
     private void Awake()
     {
@@ -25,6 +28,8 @@ public class Puzzle1Script : MonoBehaviour {
         tiltAnim = GetComponent<Animator>();
         doorAnim = transform.parent.GetComponent<Animator>();
         scriptSons = GetComponentInParent<SonPuzzle1>();
+        relatedScript = relatedBlockedRail.GetComponent<RailScriptV2>();
+        nextRailScript = nextRail.GetComponent<RailScriptV2>();
     }
 
     // Use this for initialization
@@ -42,15 +47,7 @@ public class Puzzle1Script : MonoBehaviour {
             {
                 if (isOnDoor)
                 {
-                    //if (!firstTry)
-                    //{
-                        openingDoor();
-                    //}
-                    //else
-                    //{
-                    //    scriptSons.playFail();
-                    //    firstTry = false;
-                    //}
+                    openingDoor();
                 } else
                 {
                     scriptSons.playFail();
@@ -67,16 +64,15 @@ public class Puzzle1Script : MonoBehaviour {
         tiltAnim.speed = 0;
         wait(1f);
         scriptSons.playDoorOpen();
-        relatedBlockedRail.GetComponent<RailScriptV2>().isBlocked = false;
-    }
+        relatedScript.isBlocked = false;
+        relatedScript.northRail = nextRail;
+        nextRailScript.southRail = relatedBlockedRail;
+        nextRailScript.connectRails();
+        relatedScript.connectRails();
+        relatedScript.oneWay = true;
 
-    public void setOnDoor(int value)
-    {
-        if (value == 1)
-            isOnDoor = true;
-        else
-            isOnDoor = false;
     }
+    
 
     IEnumerator wait(float sec)
     {
