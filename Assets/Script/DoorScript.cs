@@ -19,7 +19,6 @@ public class DoorScript : MonoBehaviour {
     public bool isOnDoor;
     [HideInInspector]
     public bool isDoorOpen;
-    [HideInInspector]
     public bool isHatchOpen;
 
     public AudioClip activeZone;
