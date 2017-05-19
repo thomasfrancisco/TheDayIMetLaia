@@ -7,7 +7,8 @@ public class SphereSound : MonoBehaviour {
     public AudioClip[] sons;
 
     private AudioSource source;
-    private int currentSound;
+    [HideInInspector]
+    public int currentSound;
 
     private void Awake()
     {

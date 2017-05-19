@@ -4,6 +4,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Phonon
 {
@@ -155,6 +156,42 @@ namespace Phonon
         public ConvolutionOption convolutionOption;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Complex
+    {
+        public float real;
+        public float imag;
+    }
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate void FFTHelper(IntPtr data, IntPtr signal, IntPtr spectrum);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate void HRTFLoadCallback(int signalSize, int spectrumSize, FFTHelper fftHelper, IntPtr data);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate void HRTFUnloadCallback();
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate void HRTFLookupCallback(IntPtr direction, IntPtr leftHrtf, IntPtr rightHrtf);
+
+    public enum HRTFDatabaseType
+    {
+        Default,
+        Custom
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct HRTFParams
+    {
+        public HRTFDatabaseType type;
+        public IntPtr hrtfData;
+        public int numHrirSamples;
+        public HRTFLoadCallback loadCallback;
+        public HRTFUnloadCallback unloadCallback;
+        public HRTFLookupCallback lookupCallback;
+    }
+
     // HRTF interpolation options.
     public enum HRTFInterpolation
     {
@@ -211,9 +248,9 @@ namespace Phonon
         Baked
     }
 
-    // Settings for propagation simulation.
+    // Settings for indirect simulation.
     [StructLayout(LayoutKind.Sequential)]
-    public struct PropagationSettings
+    public struct SimulationSettings
     {
         public SceneType sceneType;
         public int rays;
@@ -301,6 +338,11 @@ namespace Phonon
             convertedPoint.z = -point.z;
 
             return convertedPoint;
+        }
+
+        public static byte[] ConvertString(string s)
+        {
+            return Encoding.UTF8.GetBytes(s + Char.MinValue);
         }
     }
 }

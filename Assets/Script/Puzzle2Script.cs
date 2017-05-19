@@ -6,6 +6,7 @@ public class Puzzle2Script : MonoBehaviour {
 
     public float detectionRange;
     public float hitAngle;
+    public int[] sequence;
 
     private Transform player;
     private SphereSound[] childSphere;
@@ -53,8 +54,22 @@ public class Puzzle2Script : MonoBehaviour {
                 }
             } 
         }
+
         if (!atLeastOneHit) lastPlayed = null;
+        if (checkWin())
+        {
+            Debug.Log("Win");
+        }
 	}
 
+    private bool checkWin()
+    {
+        for(int i = 0; i < childSphere.Length; i++)
+        {
+            if (childSphere[i].currentSound != sequence[i])
+                return false;
+        }
+        return true;
+    }
     
 }

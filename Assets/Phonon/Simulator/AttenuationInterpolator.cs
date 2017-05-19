@@ -8,6 +8,7 @@ public class AttenuationInterpolator {
         startValue = .0f;
         endValue = .0f;
         currentValue = .0f;
+        nextValue = .0f;
         frameIndex = .0f;
         isInit = true;
         isDone = false;
@@ -18,22 +19,36 @@ public class AttenuationInterpolator {
         isInit = true;
     }
 
-	public float Update()
+	public float Update(out float perSampleIncrement, int samplesToInterpolate)
     {
         if (isDone)
+        {
+            perSampleIncrement = .0f;
             return currentValue;
+        }
         else
         {
-            frameIndex += 1.0f;
-            float alpha = frameIndex / numInterpFrames;
+            float delta = 1.0f / numInterpFrames;
+            float alpha = frameIndex * delta;
             if (alpha >= 1.0f)
             {
                 isDone = true;
                 currentValue = endValue;
+                nextValue = endValue;
+            }
+            else if ((alpha + delta) >= 1.0f)
+            {
+                currentValue = Mathf.Lerp(startValue, endValue, alpha);
+                nextValue = endValue;
             }
             else
+            {
                 currentValue = Mathf.Lerp(startValue, endValue, alpha);
+                nextValue = Mathf.Lerp(startValue, endValue, alpha + delta);
+            }
 
+            perSampleIncrement = (nextValue - currentValue) / samplesToInterpolate;
+            frameIndex += 1.0f;
             return currentValue;
         }
     }
@@ -54,7 +69,7 @@ public class AttenuationInterpolator {
         }
         else
         {
-            startValue = currentValue;
+            startValue = nextValue;
             endValue = value;
             frameIndex = .0f;
             isDone = false;
@@ -70,6 +85,7 @@ public class AttenuationInterpolator {
     float numInterpFrames;
 
     float currentValue;
+    float nextValue;
     float startValue;
     float endValue;
 

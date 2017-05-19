@@ -3,7 +3,6 @@
 //
 
 using UnityEditor;
-using UnityEngine;
 
 namespace Phonon
 {
@@ -24,7 +23,7 @@ namespace Phonon
         {
             serializedObject.Update();
 
-            Phonon.PhononGUI.SectionHeader("Material Preset");
+            PhononGUI.SectionHeader("Material Preset");
             EditorGUILayout.PropertyField(serializedObject.FindProperty("Preset"));
 
             if (serializedObject.FindProperty("Preset").enumValueIndex < 11)
@@ -35,7 +34,7 @@ namespace Phonon
 
             else
             {
-                Phonon.PhononGUI.SectionHeader("Custom Material");
+                PhononGUI.SectionHeader("Custom Material");
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("Value"));
             }
 

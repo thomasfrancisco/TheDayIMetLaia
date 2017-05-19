@@ -37,7 +37,7 @@ namespace Phonon
         //
 
         [DllImport("phonon")]
-        public static extern Error iplCreateScene(GlobalContext globalContext, IntPtr computeDevice, PropagationSettings simulationSettings, int numMaterials, [In, Out] ref IntPtr scene);
+        public static extern Error iplCreateScene(GlobalContext globalContext, IntPtr computeDevice, SimulationSettings simulationSettings, int numMaterials, [In, Out] ref IntPtr scene);
 
         [DllImport("phonon")]
         public static extern void iplDestroyScene([In, Out] ref IntPtr scene);
@@ -64,13 +64,13 @@ namespace Phonon
         public static extern void iplFinalizeScene(IntPtr scene, FinalizeSceneProgressCallback progressCallback);
 
         [DllImport("phonon")]
-        public static extern Error iplSaveFinalizedScene(IntPtr scene, string fileName);
+        public static extern Error iplSaveFinalizedScene(IntPtr scene, byte[] fileName);
 
         [DllImport("phonon", CallingConvention = CallingConvention.Cdecl)]
-        public static extern Error iplLoadFinalizedScene(GlobalContext globalContext, PropagationSettings simulationSettings, string fileName, IntPtr computeDevice, LoadSceneProgressCallback progressCallback, [In, Out] ref IntPtr scene);
+        public static extern Error iplLoadFinalizedScene(GlobalContext globalContext, SimulationSettings simulationSettings, byte[] fileName, IntPtr computeDevice, LoadSceneProgressCallback progressCallback, [In, Out] ref IntPtr scene);
 
         [DllImport("phonon")]
-        public static extern void iplDumpSceneToObjFile(IntPtr scene, string fileName);
+        public static extern void iplDumpSceneToObjFile(IntPtr scene, byte[] fileName);
 
         //
         // Custom ray tracer callback functions.
@@ -94,7 +94,7 @@ namespace Phonon
         //
 
         [DllImport("phonon")]
-        public static extern Error iplCreateEnvironment(GlobalContext globalContext, IntPtr computeDevice, PropagationSettings simulationSettings, IntPtr scene, IntPtr probeManager, [In, Out] ref IntPtr environment);
+        public static extern Error iplCreateEnvironment(GlobalContext globalContext, IntPtr computeDevice, SimulationSettings simulationSettings, IntPtr scene, IntPtr probeManager, [In, Out] ref IntPtr environment);
 
         [DllImport("phonon")]
         public static extern void iplDestroyEnvironment([In, Out] ref IntPtr environment);
@@ -138,7 +138,7 @@ namespace Phonon
         //
 
         [DllImport("phonon")]
-        public static extern Error iplCreateBinauralRenderer(GlobalContext globalContext, RenderingSettings renderingSettings, Byte[] hrtfData, [In, Out] ref IntPtr renderer);
+        public static extern Error iplCreateBinauralRenderer(GlobalContext globalContext, RenderingSettings renderingSettings, HRTFParams hrtfParams, [In, Out] ref IntPtr renderer);
 
         [DllImport("phonon")]
         public static extern void iplDestroyBinauralRenderer([In, Out] ref IntPtr renderer);
@@ -153,6 +153,9 @@ namespace Phonon
         public static extern void iplApplyPanningEffect(IntPtr effect, AudioBuffer inputAudio, Vector3 direction, AudioBuffer outputAudio);
 
         [DllImport("phonon")]
+        public static extern void iplFlushPanningEffect(IntPtr effect);
+
+        [DllImport("phonon")]
         public static extern Error iplCreateBinauralEffect(IntPtr renderer, AudioFormat inputFormat, AudioFormat outputFormat, [In, Out] ref IntPtr effect);
 
         [DllImport("phonon")]
@@ -160,6 +163,9 @@ namespace Phonon
 
         [DllImport("phonon")]
         public static extern void iplApplyBinauralEffect(IntPtr effect, AudioBuffer inputAudio, Vector3 direction, HRTFInterpolation interpolation, AudioBuffer outputAudio);
+
+        [DllImport("phonon")]
+        public static extern void iplFlushBinauralEffect(IntPtr effect);
 
         [DllImport("phonon")]
         public static extern Error iplCreateVirtualSurroundEffect(IntPtr renderer, AudioFormat inputFormat, AudioFormat outputFormat, [In, Out] ref IntPtr effect);
@@ -171,6 +177,9 @@ namespace Phonon
         public static extern void iplApplyVirtualSurroundEffect(IntPtr effect, AudioBuffer inputAudio, AudioBuffer outputAudio);
 
         [DllImport("phonon")]
+        public static extern void iplFlushVirtualSurroundEffect(IntPtr effect);
+
+        [DllImport("phonon")]
         public static extern Error iplCreateAmbisonicsPanningEffect(IntPtr renderer, AudioFormat inputFormat, AudioFormat outputFormat, [In, Out] ref IntPtr effect);
 
         [DllImport("phonon")]
@@ -180,6 +189,9 @@ namespace Phonon
         public static extern void iplApplyAmbisonicsPanningEffect(IntPtr effect, AudioBuffer inputAudio, AudioBuffer outputAudio);
 
         [DllImport("phonon")]
+        public static extern void iplFlushAmbisonicsPanningEffect(IntPtr effect);
+
+        [DllImport("phonon")]
         public static extern Error iplCreateAmbisonicsBinauralEffect(IntPtr renderer, AudioFormat inputFormat, AudioFormat outputFormat, [In, Out] ref IntPtr effect);
 
         [DllImport("phonon")]
@@ -187,6 +199,9 @@ namespace Phonon
 
         [DllImport("phonon")]
         public static extern void iplApplyAmbisonicsBinauralEffect(IntPtr effect, AudioBuffer inputAudio, AudioBuffer outputAudio);
+
+        [DllImport("phonon")]
+        public static extern void iplFlushAmbisonicsBinauralEffect(IntPtr effect);
 
         //
         // Functions for Environment renderer.
@@ -210,13 +225,13 @@ namespace Phonon
         //
 
         [DllImport("phonon")]
-        public static extern Error iplCreateConvolutionEffect(IntPtr renderer, string name, SimulationType simulationType, AudioFormat inputFormat, AudioFormat outputFormat, [In, Out] ref IntPtr effect);
+        public static extern Error iplCreateConvolutionEffect(IntPtr renderer, byte[] name, SimulationType simulationType, AudioFormat inputFormat, AudioFormat outputFormat, [In, Out] ref IntPtr effect);
 
         [DllImport("phonon")]
         public static extern void iplDestroyConvolutionEffect([In, Out] ref IntPtr effect);
 
         [DllImport("phonon")]
-        public static extern void iplSetConvolutionEffectName(IntPtr effect, string name);
+        public static extern void iplSetConvolutionEffectName(IntPtr effect, byte[] name);
 
         [DllImport("phonon")]
         public static extern void iplSetDryAudioForConvolutionEffect(IntPtr effect, Vector3 sourcePosition, AudioBuffer dryAudio);
@@ -226,6 +241,9 @@ namespace Phonon
 
         [DllImport("phonon")]
         public static extern void iplGetMixedEnvironmentalAudio(IntPtr renderer, Vector3 listenerPosition, Vector3 listenerAhead, Vector3 listenerUp, AudioBuffer mixedWetAudio);
+
+        [DllImport("phonon")]
+        public static extern void iplFlushConvolutionEffect(IntPtr effect);
 
         //
         // Acoustic Probes callback.
@@ -298,25 +316,25 @@ namespace Phonon
         public static extern void iplBakeReverb(IntPtr environment, IntPtr probeBox, BakingSettings bakingSettings, BakeProgressCallback progressCallback);
 
         [DllImport("phonon")]
-        public static extern void iplBakePropagation(IntPtr environment, IntPtr probeBox, Sphere sourceInfluence, string sourceName, BakingSettings bakingSettings, BakeProgressCallback progressCallback);
+        public static extern void iplBakePropagation(IntPtr environment, IntPtr probeBox, Sphere sourceInfluence, byte[] sourceName, BakingSettings bakingSettings, BakeProgressCallback progressCallback);
 
         [DllImport("phonon")]
-        public static extern void iplBakeStaticListener(IntPtr environment, IntPtr probeBox, Sphere listenerInfluence, string listenerName, BakingSettings bakingSettings, BakeProgressCallback progressCallback);
+        public static extern void iplBakeStaticListener(IntPtr environment, IntPtr probeBox, Sphere listenerInfluence, byte[] listenerName, BakingSettings bakingSettings, BakeProgressCallback progressCallback);
 
         [DllImport("phonon")]
         public static extern void iplCancelBake();
 
         [DllImport("phonon")]
-        public static extern void iplDeleteBakedDataByName(IntPtr probeBox, string sourceName);
+        public static extern void iplDeleteBakedDataByName(IntPtr probeBox, byte[] sourceName);
 
         [DllImport("phonon")]
-        public static extern int iplGetBakedDataSizeByName(IntPtr probeBox, string sourceName);
+        public static extern int iplGetBakedDataSizeByName(IntPtr probeBox, byte[] sourceName);
 
         //
         // Functions for generating IRs for analysis and visualization.
 
         [DllImport("phonon")]
-        public static extern Error iplCreateSimulationData(PropagationSettings simulationSettings, RenderingSettings renderingSettings, [In, Out] ref IntPtr simulationData);
+        public static extern Error iplCreateSimulationData(SimulationSettings simulationSettings, RenderingSettings renderingSettings, [In, Out] ref IntPtr simulationData);
 
         [DllImport("phonon")]
         public static extern void iplDestroySimulationData([In, Out] ref IntPtr simulationData);

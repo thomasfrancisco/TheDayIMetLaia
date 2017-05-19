@@ -44,7 +44,7 @@ namespace Phonon
             ProbeBox probeBox = serializedObject.targetObject as ProbeBox;
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(" ");
-            if (GUILayout.Button("Generate Probe"))
+            if (GUILayout.Button("Generate Probes"))
             {
                 probeBox.GenerateProbes();
                 EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());

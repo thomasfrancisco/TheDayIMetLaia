@@ -5,6 +5,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Phonon
 {
@@ -27,7 +28,8 @@ namespace Phonon
             if (probeSpherePoints != null)
                 for (int i = 0; i < probeSpherePoints.Length / 3; ++i)
                 {
-                    UnityEngine.Vector3 center = new UnityEngine.Vector3(probeSpherePoints[3 * i + 0], probeSpherePoints[3 * i + 1], -probeSpherePoints[3 * i + 2]);
+                    UnityEngine.Vector3 center = new UnityEngine.Vector3(probeSpherePoints[3 * i + 0], 
+                        probeSpherePoints[3 * i + 1], -probeSpherePoints[3 * i + 2]);
                     Gizmos.DrawCube(center, new UnityEngine.Vector3(PROBE_DRAW_SIZE, PROBE_DRAW_SIZE, PROBE_DRAW_SIZE));
                 }
             Gizmos.color = oldColor;
@@ -43,16 +45,20 @@ namespace Phonon
             placementParameters.heightAboveFloor = heightAboveFloor;
 
             // Initialize environment
-            EnvironmentComponent envComponent;
+            PhononManager duringProbePhononManager;
+            PhononManagerContainer duringProbePhononContainer;
             try
             {
-                envComponent = FindObjectOfType<EnvironmentComponent>();
-                if (envComponent == null)
-                    throw new Exception("Environment Component not found. Add one to the scene");
-                bool initializeRenderer = false;
-                envComponent.Initialize(initializeRenderer);
+                duringProbePhononManager = FindObjectOfType<PhononManager>();
+                if (duringProbePhononManager == null)
+                    throw new Exception("Phonon Manager Settings object not found in the scene! Click Window > Phonon");
 
-                if (envComponent.Scene().GetScene() == IntPtr.Zero)
+                bool initializeRenderer = false;
+                duringProbePhononManager.Initialize(initializeRenderer);
+                duringProbePhononContainer = duringProbePhononManager.PhononManagerContainer();
+                duringProbePhononContainer.Initialize(initializeRenderer, duringProbePhononManager);
+
+                if (duringProbePhononContainer.Scene().GetScene() == IntPtr.Zero)
                     Debug.LogError("Scene not found. Make sure to pre-export the scene.");
             }
             catch (Exception e)
@@ -66,10 +72,14 @@ namespace Phonon
             Box boundingBox;
             boundingBox.minCoordinates = Common.ConvertVector(gameObject.transform.position);
             boundingBox.maxCoordinates = Common.ConvertVector(gameObject.transform.position);
-            boundingBox.minCoordinates.x -= gameObject.transform.localScale.x / 2; boundingBox.minCoordinates.y -= gameObject.transform.localScale.y / 2; boundingBox.minCoordinates.z -= gameObject.transform.localScale.z / 2;
-            boundingBox.maxCoordinates.x += gameObject.transform.localScale.x / 2; boundingBox.maxCoordinates.y += gameObject.transform.localScale.y / 2; boundingBox.maxCoordinates.z += gameObject.transform.localScale.z / 2;
+            boundingBox.minCoordinates.x -= gameObject.transform.localScale.x / 2;
+            boundingBox.minCoordinates.y -= gameObject.transform.localScale.y / 2;
+            boundingBox.minCoordinates.z -= gameObject.transform.localScale.z / 2;
+            boundingBox.maxCoordinates.x += gameObject.transform.localScale.x / 2;
+            boundingBox.maxCoordinates.y += gameObject.transform.localScale.y / 2;
+            boundingBox.maxCoordinates.z += gameObject.transform.localScale.z / 2;
 
-            PhononCore.iplCreateProbeBox(envComponent.Scene().GetScene(), boundingBox, placementParameters, null, ref probeBox);
+            PhononCore.iplCreateProbeBox(duringProbePhononContainer.Scene().GetScene(), boundingBox, placementParameters, null, ref probeBox);
 
             int numProbes = PhononCore.iplGetProbeSpheres(probeBox, null);
             probeSpherePoints = new float[3*numProbes];
@@ -85,21 +95,24 @@ namespace Phonon
                 probeSphereRadii[i] = probeSpheres[i].radius;
             }
 
-            //// Save probe box into searlized data;
+            // Save probe box into searlized data;
             int probeBoxSize = PhononCore.iplSaveProbeBox(probeBox, null);
             probeBoxData = new byte[probeBoxSize];
             PhononCore.iplSaveProbeBox(probeBox, probeBoxData);
 
+            if (duringProbePhononContainer.Scene().GetScene() != IntPtr.Zero)
+                Debug.Log("Generated " + probeSpheres.Length + " probes for game object " + gameObject.name + ".");
+
             // Cleanup.
             PhononCore.iplDestroyProbeBox(ref probeBox);
-            envComponent.Destroy();
+            duringProbePhononManager.Destroy();
+            duringProbePhononContainer.Destroy();
             ClearProbeDataMapping();
 
             // Redraw scene view for probes to show up instantly.
 #if UNITY_EDITOR
             UnityEditor.SceneView.RepaintAll();
 #endif
-            Debug.Log("Generated " + probeSpheres.Length + " probes for game object " + gameObject.name + ".");
         }
 
         public void DeleteBakedDataByName(string name)
@@ -108,7 +121,7 @@ namespace Phonon
             try
             {
                 PhononCore.iplLoadProbeBox(probeBoxData, probeBoxData.Length, ref probeBox);
-                PhononCore.iplDeleteBakedDataByName(probeBox, name);
+                PhononCore.iplDeleteBakedDataByName(probeBox, Common.ConvertString(name));
                 UpdateProbeDataMapping(name, -1);
 
                 int probeBoxSize = PhononCore.iplSaveProbeBox(probeBox, null);

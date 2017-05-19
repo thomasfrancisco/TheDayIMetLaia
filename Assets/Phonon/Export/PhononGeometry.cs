@@ -106,16 +106,18 @@ namespace Phonon
             }
         }
 
+        // Sets material to the Phonon Material component attached to the object.
+        // material is unchanged if no Phonon Material component is attached.
         public void GetMaterial(ref Material material)
         {
             var attachedMaterial = GetComponent<PhononMaterial>();
-            var materialValue = (attachedMaterial == null) ? PhononMaterialSettings.GetDefaultMaterial().Value :
-                attachedMaterial.Value;
+            if (attachedMaterial == null)
+                return;
 
-            material.absorptionLow = materialValue.LowFreqAbsorption;
-            material.absorptionMid = materialValue.MidFreqAbsorption;
-            material.absorptionHigh = materialValue.HighFreqAbsorption;
-            material.scattering = materialValue.Scattering;
+            material.absorptionLow = attachedMaterial.Value.LowFreqAbsorption;
+            material.absorptionMid = attachedMaterial.Value.MidFreqAbsorption;
+            material.absorptionHigh = attachedMaterial.Value.HighFreqAbsorption;
+            material.scattering = attachedMaterial.Value.Scattering;
         }
 
         int GetNumVerticesForMesh(MeshFilter mesh)

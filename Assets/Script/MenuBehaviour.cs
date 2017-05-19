@@ -20,7 +20,7 @@ public class MenuBehaviour : MonoBehaviour {
 	void Update () {
 		if(Input.inputString == "\n" || Input.GetButtonDown("Fire1"))
         {
-            SceneManager.LoadSceneAsync("Final", LoadSceneMode.Single);
+            SceneManager.LoadSceneAsync(1, LoadSceneMode.Single);
         }
 	}
 }

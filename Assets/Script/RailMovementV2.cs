@@ -371,4 +371,10 @@ public class RailMovementV2 : MonoBehaviour {
         
     }
 
+    public RailScriptV2 getIntersection()
+    {
+        return intersection;
+    }
+
+   
 }
