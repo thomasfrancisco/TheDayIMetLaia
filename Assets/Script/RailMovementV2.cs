@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RailMovementV2 : MonoBehaviour {
+public class RailMovementV2 : MonoBehaviour
+{
 
     public Transform firstRail;
     public float angleMaxDirection; //Angle entre la vue et le prochain waypoint maximum. Si inferieur, on considere que le joueur n'est pas face à la bonne direction
@@ -13,7 +14,7 @@ public class RailMovementV2 : MonoBehaviour {
     public bool reculeDebloque;
 
     //boolean pour les sons avancer et reculer
-    //[HideInInspector]
+    [HideInInspector]
     public bool isMovingForward;
     [HideInInspector]
     public bool isMovingBackward;
@@ -23,7 +24,10 @@ public class RailMovementV2 : MonoBehaviour {
     private RailScriptV2 previous;
     private RailScriptV2 next;
 
-    public float alphaPosition;  
+    public float alphaPosition;
+    //Pour les demi tour
+    private Transform frontRail;
+    private float yEulerAngle;
 
     private bool isOnIntersection;
     private RailScriptV2 intersection;
@@ -42,8 +46,9 @@ public class RailMovementV2 : MonoBehaviour {
     public bool doAction;
     private SonAction sonAction;
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start()
+    {
         alphaPosition = 0.01f;
         isMovingForward = false;
         isMovingBackward = false;
@@ -55,6 +60,7 @@ public class RailMovementV2 : MonoBehaviour {
         previous = firstRail.GetComponent<RailScriptV2>();
         next = previous.allRails[0];
         transform.position = firstRail.position;
+        frontRail = next.transform;
 
         timerSound = 0f;
 
@@ -62,11 +68,12 @@ public class RailMovementV2 : MonoBehaviour {
         sonAiguillage = transform.FindChild("Aiguillage").GetComponent<SonAiguillage>();
         sonRoue = transform.FindChild("Roues").GetComponent<SonRoue>();
         sonAction = transform.FindChild("Action").GetComponent<SonAction>();
-        
+
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    // Update is called once per frame
+    void Update()
+    {
         if (Input.GetButtonDown("Fire1") || Input.inputString == "\n")
             doAction = true;
         if (isOnIntersection)
@@ -99,35 +106,41 @@ public class RailMovementV2 : MonoBehaviour {
                             updateAiguillage();
                         }
                     }
-                    
-                } else
+
+                }
+                else
                 {
                     updateMovementState(0f, false);
                     if (Input.GetAxis("Vertical") == 0) needDeathPoint = false;
                 }
-            } else
+            }
+            else
             {
+                testGoBack();
                 if (!nextTrack())
                     cancelMovement();
                 else
                     sonCollision.resetCollision();
-                
+
             }
-        } else
+        }
+        else
         {
             if (movementUnlocked())
             {
                 move();
                 testIntersection();
-            } else
+            }
+            else
             {
                 updateMovementState(0f, false);
             }
-            
-        }
-	}
+            testGoBack();
 
-    
+        }
+    }
+
+
     //Met a jour l'aiguillage
     private void updateAiguillage()
     {
@@ -142,15 +155,17 @@ public class RailMovementV2 : MonoBehaviour {
                 isAigMoving = true;
 
             }
-        } else if (choiceUndisposedIntersection.Length == 1)
+        }
+        else if (choiceUndisposedIntersection.Length == 1)
         {
-            if(getAngleWithObject(choiceUndisposedIntersection[0].transform) < angleIntersection)
+            if (getAngleWithObject(choiceUndisposedIntersection[0].transform) < angleIntersection)
             {
                 doAction = false;
                 intersection.changeAiguillage();
                 isAigMoving = true;
             }
-        } else
+        }
+        else
         {
             //Pas d'intersection
 
@@ -161,7 +176,7 @@ public class RailMovementV2 : MonoBehaviour {
     private bool nextTrack()
     {
         RailScriptV2[] choiceIntersection = intersection.getRailAiguillage();
-        if(Input.GetAxis("Vertical") > 0)
+        if (Input.GetAxis("Vertical") > 0)
         {
             if (choiceIntersection.Length > 0)
             {
@@ -169,6 +184,8 @@ public class RailMovementV2 : MonoBehaviour {
                 {
                     previous = intersection;
                     next = choiceIntersection[0];
+                    frontRail = next.transform;
+                    yEulerAngle = Camera.main.transform.eulerAngles.y;
                     isOnIntersection = false;
                     alphaPosition = 0.01f;
                     return true;
@@ -180,19 +197,24 @@ public class RailMovementV2 : MonoBehaviour {
                 {
                     previous = intersection;
                     next = choiceIntersection[1];
+                    frontRail = next.transform;
+                    yEulerAngle = Camera.main.transform.eulerAngles.y;
                     isOnIntersection = false;
                     alphaPosition = 0.01f;
                     return true;
                 }
             }
-        } else if(Input.GetAxis("Vertical") < 0)
+        }
+        else if (Input.GetAxis("Vertical") < 0)
         {
             if (choiceIntersection.Length > 0)
             {
-                if (getAngleWithObject(choiceIntersection[0].transform, true)<  angleIntersection)
+                if (getAngleWithObject(choiceIntersection[0].transform, true) < angleIntersection)
                 {
                     previous = choiceIntersection[0];
                     next = intersection;
+                    frontRail = next.transform;
+                    yEulerAngle = Camera.main.transform.eulerAngles.y;
                     isOnIntersection = false;
                     alphaPosition = 0.99f;
                     return true;
@@ -200,10 +222,12 @@ public class RailMovementV2 : MonoBehaviour {
             }
             if (choiceIntersection.Length > 1)
             {
-                if (getAngleWithObject(choiceIntersection[1].transform, true)< angleIntersection)
+                if (getAngleWithObject(choiceIntersection[1].transform, true) < angleIntersection)
                 {
                     previous = choiceIntersection[1];
                     next = intersection;
+                    frontRail = next.transform;
+                    yEulerAngle = Camera.main.transform.eulerAngles.y;
                     isOnIntersection = false;
                     alphaPosition = 0.99f;
                     return true;
@@ -225,14 +249,15 @@ public class RailMovementV2 : MonoBehaviour {
     //Verifie que le joueur se trouve sur une intersection.
     private void testIntersection()
     {
-        if(alphaPosition < 0)
+        if (alphaPosition < 0)
         {
             if (!previous.oneWay)
             {
                 intersection = previous;
                 isOnIntersection = true;
                 needDeathPoint = true;
-            } else
+            }
+            else
             {
                 //Cas d'un rail "OneWay"
                 if (!previous.isBlocked)
@@ -241,19 +266,23 @@ public class RailMovementV2 : MonoBehaviour {
                     {
                         next = previous;
                         previous = previous.getRailAiguillage()[1];
+                        frontRail = next.transform;
+                        yEulerAngle = Camera.main.transform.eulerAngles.y;
                         alphaPosition = 0.99f;
                     }
                 }
-                
+
             }
-        } else if (alphaPosition > 1)
+        }
+        else if (alphaPosition > 1)
         {
             if (!next.oneWay)
             {
                 intersection = next;
                 isOnIntersection = true;
                 needDeathPoint = true;
-            } else
+            }
+            else
             {
                 //Cas d'un rail "OneWay"
                 if (!next.isBlocked)
@@ -262,10 +291,12 @@ public class RailMovementV2 : MonoBehaviour {
                     {
                         previous = next;
                         next = next.getRailAiguillage()[0];
+                        frontRail = next.transform;
+                        yEulerAngle = Camera.main.transform.eulerAngles.y;
                         alphaPosition = 0.01f;
                     }
                 }
-                
+
             }
         }
     }
@@ -296,7 +327,8 @@ public class RailMovementV2 : MonoBehaviour {
                 isMovingForward = false;
                 isMovingBlocked = false;
             }
-        } else
+        }
+        else
         {
             isMovingBlocked = false;
             isMovingForward = false;
@@ -311,17 +343,18 @@ public class RailMovementV2 : MonoBehaviour {
         float verticalAxis = Input.GetAxis("Vertical");
         float angleNextElement = getAngleWithObject(previous.transform);
         float angleSecondElement = getAngleWithObject(next.transform);
-        
-        if(angleSecondElement < angleMaxDirection)
+
+        if (angleSecondElement < angleMaxDirection)
         {
             if (verticalAxis != 0)
             {
                 updateMovementState(verticalAxis, true);
                 return verticalAxis * (speed / Vector3.Distance(previous.transform.position, next.transform.position)) * Time.deltaTime;
             }
-        } else if(angleNextElement < angleMaxDirection)
+        }
+        else if (angleNextElement < angleMaxDirection)
         {
-            if(verticalAxis != 0)
+            if (verticalAxis != 0)
             {
                 updateMovementState(verticalAxis, true);
                 return verticalAxis * (speed / Vector3.Distance(previous.transform.position, next.transform.position)) * Time.deltaTime * -1;
@@ -363,12 +396,27 @@ public class RailMovementV2 : MonoBehaviour {
     private void playSoundsRails()
     {
         timerSound += Time.deltaTime;
-        if(timerSound > frequenceSons)
+        if (timerSound > frequenceSons)
         {
             timerSound = 0f;
             intersection.playNextRailSound();
         }
-        
+
+    }
+
+    private void testGoBack()
+    {
+
+        if (getAngleWithObject(frontRail) < angleMaxDirection
+            || getAngleWithObject(frontRail, true) < angleMaxDirection)
+        {
+            float y = Mathf.Abs(Camera.main.transform.eulerAngles.y - yEulerAngle);
+            if (y < 180 + angleMaxDirection && y > 180 - angleMaxDirection)
+            {
+                yEulerAngle = Camera.main.transform.eulerAngles.y;
+                sonRoue.playSoundDemiTour();
+            }
+        }
     }
 
     public RailScriptV2 getIntersection()
@@ -376,5 +424,5 @@ public class RailMovementV2 : MonoBehaviour {
         return intersection;
     }
 
-   
+
 }
