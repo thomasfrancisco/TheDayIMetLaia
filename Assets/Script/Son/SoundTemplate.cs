@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SoundTemplate {
+public class SoundTemplate : MonoBehaviour{
     private AudioClip _clip; //Clip a jouer
     private bool _isPlayed;
     private List<AudioSource> _sources; //S'il y en a plusieurs
+    public delegate void AudioCallback();
 
     public SoundTemplate(AudioClip clip, AudioSource source)
     {
@@ -57,6 +58,22 @@ public class SoundTemplate {
     public void addSource(AudioSource source)
     {
         _sources.Add(source);
+    }
+
+    public void playSoundWithCallback(AudioClip clip, AudioCallback callback)
+    {
+        foreach(AudioSource source in _sources)
+        {
+            source.PlayOneShot(clip);
+        }
+        StartCoroutine(DelayedCallback(clip.length, callback));
+        
+    }
+
+    private IEnumerator DelayedCallback(float time, AudioCallback callback)
+    {
+        yield return new WaitForSeconds(time);
+        callback();
     }
     
 

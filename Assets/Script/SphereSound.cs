@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class SphereSound : MonoBehaviour {
 
-    public AudioClip[] sons;
+
+
+    public AudioClip[] sounds;
 
     private AudioSource source;
     [HideInInspector]
@@ -14,7 +16,7 @@ public class SphereSound : MonoBehaviour {
     {
         currentSound = 0;
         source = GetComponent<AudioSource>();
-        source.clip = sons[currentSound];
+        source.clip = sounds[currentSound];
     }
 
     // Use this for initialization
@@ -35,7 +37,7 @@ public class SphereSound : MonoBehaviour {
 
     public void increaseSoundValue()
     {
-        currentSound = (currentSound + 1) % sons.Length;
-        source.clip = sons[currentSound];
+        currentSound = (currentSound + 1) % sounds.Length;
+        source.clip = sounds[currentSound];
     }
 }

@@ -10,6 +10,7 @@ public class AudioLogBehaviour : MonoBehaviour {
     public bool audioLog_Played;
     public float frequency;
     public AudioClip audioLog_Content;
+    public AudioClip[] sequence;
     public AudioClip soundFar;
     public AudioClip soundNear;
     public AudioClip soundAlreadyPlayed;
@@ -22,6 +23,7 @@ public class AudioLogBehaviour : MonoBehaviour {
     private bool isPlaying;
     private float timer;
     private bool willPlay;
+    private bool isSequence;
 
     private void Awake()
     {
@@ -33,6 +35,10 @@ public class AudioLogBehaviour : MonoBehaviour {
         isPlaying = false;
         willPlay = false;
         timer = 0f;
+        if (!audioLog_Content)
+        {
+            isSequence = true;
+        }
     }
 
     // Use this for initialization
@@ -58,8 +64,14 @@ public class AudioLogBehaviour : MonoBehaviour {
             {
                 willPlay = false;
                 isPlaying = true;
-                source.clip = audioLog_Content;
-                source.Play();
+                if (!isSequence)
+                {
+                    source.clip = audioLog_Content;
+                    source.Play();
+                } else
+                {
+                    StartCoroutine(playSequence());
+                }
             }
         } else if (distance < trigger_dist)
         {
@@ -78,6 +90,7 @@ public class AudioLogBehaviour : MonoBehaviour {
                 if (getAngleWithObject(transform) < trigger_angle)
                 {
                     movementScript.doAction = false;
+                    
                     source.clip = soundActivation;
                     source.Play();
                     willPlay = true;
@@ -101,5 +114,14 @@ public class AudioLogBehaviour : MonoBehaviour {
         return Vector3.Angle(target.position - Camera.main.transform.position, Camera.main.transform.forward);
     }
     
+    private IEnumerator playSequence()
+    {
+        for(int i = 0; i < sequence.Length; i++)
+        {
+            source.clip = sequence[i];
+            source.Play();
+            yield return new WaitForSeconds(0.5f);
+        }
+    }
     
 }
