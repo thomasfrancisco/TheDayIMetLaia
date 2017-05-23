@@ -37,10 +37,12 @@ public class RailScriptV2 : MonoBehaviour {
     //Pour trigger les collisions
     [HideInInspector]
     public bool isCollided;
-
+    [HideInInspector]
+    public bool doRailSounds;
 
     // Use this for initialization
     void Awake() {
+        doRailSounds = true;
         connectRails();
         isSelected = false;
         itRails = 0;
@@ -197,10 +199,18 @@ public class RailScriptV2 : MonoBehaviour {
     //Fais sonner les autres voies une par une
     public void playNextRailSound()
     {
-        if(itRails < allRails.Length)
-            allRails[itRails].playMySound(allRailsPosition[itRails]);
+            if (itRails < allRails.Length)
+                allRails[itRails].playMySound(allRailsPosition[itRails]);
 
-        itRails = (itRails + 1) % (allRails.Length + emptyHit);
+            itRails++;
+            if (itRails > allRails.Length)
+                doRailSounds = false;
+        
+    }
+
+    public void resetNextRailSound()
+    {
+        doRailSounds = true;
     }
 
     public void playMySound(RailPosition railPosition)

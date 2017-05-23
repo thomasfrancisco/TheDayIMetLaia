@@ -34,6 +34,8 @@ public class RailMovementV2 : MonoBehaviour
     private bool needDeathPoint;
     private bool isAigMoving;
 
+    private Transform intersectionLookingAt;
+
     //Timer pour jouer les sons
     private float timerSound;
     public float frequenceSons;
@@ -395,11 +397,38 @@ public class RailMovementV2 : MonoBehaviour
     //Joue les sons des voies empruntables lorsqu'on est sur une intersection
     private void playSoundsRails()
     {
-        timerSound += Time.deltaTime;
-        if (timerSound > frequenceSons)
+        if (intersection.doRailSounds)
         {
-            timerSound = 0f;
-            intersection.playNextRailSound();
+            timerSound += Time.deltaTime;
+            if (timerSound > frequenceSons)
+            {
+                timerSound = 0f;
+                intersection.playNextRailSound();
+            }
+        } else
+        {
+                for (int i = 0; i < intersection.allRails.Length; i++)
+                {
+                if (getAngleWithObject(intersection.allRails[i].transform) < angleMaxDirection)
+                {
+                        if (intersection.allRails[i].transform != intersectionLookingAt
+                        || !intersectionLookingAt)
+                        {
+                            if (intersection.allRails[i].transform == intersection.northRail)
+                                intersection.allRails[i].playMySound(RailPosition.North);
+                            else if (intersection.allRails[i].transform == intersection.westRail)
+                                intersection.allRails[i].playMySound(RailPosition.West);
+                            else if (intersection.allRails[i].transform == intersection.southRail)
+                                intersection.allRails[i].playMySound(RailPosition.South);
+                            else if (intersection.allRails[i].transform == intersection.eastRail)
+                                intersection.allRails[i].playMySound(RailPosition.East);
+                            intersectionLookingAt = intersection.allRails[i].transform;
+                            return;
+                        }
+                    
+                }
+                
+            }
         }
 
     }
