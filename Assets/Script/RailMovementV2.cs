@@ -417,7 +417,6 @@ public class RailMovementV2 : MonoBehaviour
         {
 
             inactivityTimer += Time.deltaTime;
-            Debug.Log(inactivityTimer + " > " + inactivityDelayIntersection);
             if (inactivityTimer > inactivityDelayIntersection)
             {
                 intersection.resetNextRailSound();
