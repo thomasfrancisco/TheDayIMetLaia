@@ -24,7 +24,7 @@ public class RailMovementV2 : MonoBehaviour
     private RailScriptV2 previous;
     private RailScriptV2 next;
 
-    public float alphaPosition;
+    private float alphaPosition;
     //Pour les demi tour
     private Transform frontRail;
     private float yEulerAngle;
@@ -39,6 +39,8 @@ public class RailMovementV2 : MonoBehaviour
     //Timer pour jouer les sons
     private float timerSound;
     public float frequenceSons;
+    public float inactivityDelayIntersection;
+    private float inactivityTimer;
 
     //Autre source sonore correspondant au corp d'UGO
     private SonChoc sonCollision;
@@ -65,6 +67,7 @@ public class RailMovementV2 : MonoBehaviour
         frontRail = next.transform;
 
         timerSound = 0f;
+        inactivityTimer = 0f;
 
         sonCollision = transform.FindChild("Choc").GetComponent<SonChoc>();
         sonAiguillage = transform.FindChild("Aiguillage").GetComponent<SonAiguillage>();
@@ -82,7 +85,8 @@ public class RailMovementV2 : MonoBehaviour
         {
             if (!intersection.isBlocked)
             {
-                playSoundsRails();
+                if(!isAigMoving)
+                    playSoundsRails();
                 sonAiguillage.playIntersection();
                 if (!needDeathPoint)
                 {
@@ -101,6 +105,8 @@ public class RailMovementV2 : MonoBehaviour
                             {
                                 sonAiguillage.reset();
                                 sonAiguillage.playDecroche();
+                                intersection.resetNextRailSound();
+                                inactivityTimer = 0f;
                             }
                         }
                         else if (Input.GetButtonDown("Fire1") || Input.inputString == "\n")
@@ -405,14 +411,26 @@ public class RailMovementV2 : MonoBehaviour
                 timerSound = 0f;
                 intersection.playNextRailSound();
             }
-        } else
+            intersectionLookingAt = null;
+        }
+        else
         {
-                for (int i = 0; i < intersection.allRails.Length; i++)
+
+            inactivityTimer += Time.deltaTime;
+            Debug.Log(inactivityTimer + " > " + inactivityDelayIntersection);
+            if (inactivityTimer > inactivityDelayIntersection)
+            {
+                intersection.resetNextRailSound();
+                inactivityTimer = 0f;
+            }
+
+            for (int i = 0; i < intersection.allRails.Length; i++)
+            {
+                if (getAngleWithObject(intersection.allRails[i].transform) < angleIntersection)
                 {
-                if (getAngleWithObject(intersection.allRails[i].transform) < angleMaxDirection)
-                {
-                        if (intersection.allRails[i].transform != intersectionLookingAt
-                        || !intersectionLookingAt)
+                    if (intersectionLookingAt)
+                    {
+                        if (intersection.allRails[i].transform != intersectionLookingAt)
                         {
                             if (intersection.allRails[i].transform == intersection.northRail)
                                 intersection.allRails[i].playMySound(RailPosition.North);
@@ -422,12 +440,12 @@ public class RailMovementV2 : MonoBehaviour
                                 intersection.allRails[i].playMySound(RailPosition.South);
                             else if (intersection.allRails[i].transform == intersection.eastRail)
                                 intersection.allRails[i].playMySound(RailPosition.East);
-                            intersectionLookingAt = intersection.allRails[i].transform;
-                            return;
+                            inactivityTimer = 0f;
                         }
-                    
+                    }
+                    intersectionLookingAt = intersection.allRails[i].transform;
+                    return;
                 }
-                
             }
         }
 

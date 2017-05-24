@@ -211,6 +211,7 @@ public class RailScriptV2 : MonoBehaviour {
     public void resetNextRailSound()
     {
         doRailSounds = true;
+        itRails = 0;
     }
 
     public void playMySound(RailPosition railPosition)

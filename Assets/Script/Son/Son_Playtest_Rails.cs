@@ -119,6 +119,7 @@ public class Son_Playtest_Rails : MonoBehaviour {
                 if (!sound_2_2.isPlayed())
                 {
                     sound_2_2.play();
+                    
                 }
             }
             if(aig2_rail.aigPosition == RailScriptV2.AigPosition.aig2)
