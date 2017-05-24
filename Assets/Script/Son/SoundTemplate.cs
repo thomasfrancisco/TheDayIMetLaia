@@ -7,6 +7,7 @@ public class SoundTemplate : MonoBehaviour{
     private bool _isPlayed;
     private List<AudioSource> _sources; //S'il y en a plusieurs
     public delegate void AudioCallback();
+    private bool _finished;
 
     public SoundTemplate(AudioClip clip, AudioSource source)
     {
@@ -14,16 +15,20 @@ public class SoundTemplate : MonoBehaviour{
         _sources = new List<AudioSource>();
         _sources.Add(source);
         _isPlayed = false;
+        _finished = false;
     }
 
     public SoundTemplate(AudioClip clip, List<AudioSource> sources)
     {
         _clip = clip;
         _sources = sources;
+        _isPlayed = false;
+        _finished = false;
     }
 
     public void play()
     {
+        _finished = false;
         foreach (AudioSource source in _sources)
         {
             source.clip = _clip;
@@ -31,6 +36,7 @@ public class SoundTemplate : MonoBehaviour{
         }
         _isPlayed = true;
     }
+    
 
     public bool isPlayed()
     {
@@ -42,17 +48,9 @@ public class SoundTemplate : MonoBehaviour{
         _isPlayed = isPlayed;
     }
     
-    public bool hasFinished()
+    public bool isFinished()
     {
-        if(_sources[0].clip == _clip)
-        {
-            if(_sources[0].timeSamples == 0
-                || _sources[0].timeSamples >= _sources[0].clip.samples- 5)
-            {
-                return true;
-            }
-        }
-        return false;
+        return _finished;
     }
 
     public void addSource(AudioSource source)
@@ -60,17 +58,14 @@ public class SoundTemplate : MonoBehaviour{
         _sources.Add(source);
     }
 
-    public void playSoundWithCallback(AudioClip clip, AudioCallback callback)
+    public IEnumerator endOfClip()
     {
-        foreach(AudioSource source in _sources)
-        {
-            source.PlayOneShot(clip);
-        }
-        StartCoroutine(DelayedCallback(clip.length, callback));
+        yield return new WaitForSeconds(_clip.length);
+        _finished = true;
         
     }
 
-    private IEnumerator DelayedCallback(float time, AudioCallback callback)
+    public IEnumerator DelayedCallback(float time, AudioCallback callback)
     {
         yield return new WaitForSeconds(time);
         callback();

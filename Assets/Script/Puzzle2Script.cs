@@ -20,6 +20,7 @@ public class Puzzle2Script : MonoBehaviour {
     private SwitchBehavior switchBehavior;
     private AudioSource source;
     private bool panelHidden;
+    private int nbMissed;
     
 
 
@@ -35,7 +36,8 @@ public class Puzzle2Script : MonoBehaviour {
         movementScript = player.GetComponent<RailMovementV2>();
         switchBehavior = switchButton.GetComponent<SwitchBehavior>();
         source = GetComponent<AudioSource>();
-        panelHidden = true; 
+        panelHidden = true;
+        nbMissed = 0;
     }
 
     // Use this for initialization
@@ -100,8 +102,14 @@ public class Puzzle2Script : MonoBehaviour {
             } else
             {
                 switchBehavior.playFail();
+                nbMissed++;
             }
         }
+    }
+
+    public int getNbMissed()
+    {
+        return nbMissed;
     }
 
     public bool checkWin()

@@ -15,6 +15,7 @@ public class AudioLogBehaviour : MonoBehaviour {
     public AudioClip soundNear;
     public AudioClip soundAlreadyPlayed;
     public AudioClip soundActivation;
+    public bool isFinished;
 
     private AudioSource source;
     private Transform ugo;
@@ -27,6 +28,7 @@ public class AudioLogBehaviour : MonoBehaviour {
 
     private void Awake()
     {
+        isFinished = false;
         source = GetComponent<AudioSource>();
         source.playOnAwake = false;
         source.loop = false;
@@ -116,12 +118,14 @@ public class AudioLogBehaviour : MonoBehaviour {
     
     private IEnumerator playSequence()
     {
+        isFinished = false;
         for(int i = 0; i < sequence.Length; i++)
         {
             source.clip = sequence[i];
             source.Play();
             yield return new WaitForSeconds(0.5f);
         }
+        isFinished = true;
     }
     
 }
