@@ -58,9 +58,9 @@ public class SoundTemplate : MonoBehaviour{
         _sources.Add(source);
     }
 
-    public IEnumerator endOfClip()
+    public IEnumerator endOfClip(float minusTime)
     {
-        yield return new WaitForSeconds(_clip.length);
+        yield return new WaitForSeconds(_clip.length - minusTime);
         _finished = true;
         
     }
