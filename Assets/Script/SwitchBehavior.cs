@@ -34,28 +34,30 @@ public class SwitchBehavior : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if(Vector3.Distance(ugo.position, transform.position) < minDistTrigger)
-        {
-            if(getAngleWithObject(transform) < minAngle)
+            if (Vector3.Distance(ugo.position, transform.position) < minDistTrigger)
             {
-                if (!isHover)
+                if (getAngleWithObject(transform) < minAngle)
                 {
-                    //source.clip = PUZ2_DoneSwitch_Hover;
-                    //source.Play();
-                    isHover = true;
-                }
-                if(Input.GetButtonDown("Fire1") || Input.inputString == "\n")
-                {
-                    // source.clip = push
-                    scriptMovement.doAction = false;
-                    StartCoroutine(script.playSequence());
-                }
+                    if (!isHover)
+                    {
+                        //source.clip = PUZ2_DoneSwitch_Hover;
+                        //source.Play();
+                        isHover = true;
+                    }
+                    if (Input.GetButtonDown("Fire1") || Input.inputString == "\n")
+                    {
+                        // source.clip = push
+                        scriptMovement.doAction = false;
+                        if(linkPuzzle != null)
+                            StartCoroutine(script.playSequence());
+                    }
 
-            } else
-            {
-                isHover = false;
+                }
+                else
+                {
+                    isHover = false;
+                }
             }
-        }		
 	}
 
     private float getAngleWithObject(Transform target)
