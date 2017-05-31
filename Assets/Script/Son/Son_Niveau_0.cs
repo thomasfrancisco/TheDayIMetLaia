@@ -36,6 +36,11 @@ public class Son_Niveau_0 : MonoBehaviour {
     public float minAngleHead;
     public float timeBeforeRepeat;
 
+    public Transform speakers1;
+    public Transform speakers2;
+    public Transform railNiv1;
+    public Transform railNiv2;
+
     private AudioSource[] sources;
     public actionExpected nextAction;
     private DoorScript doorScript;
@@ -59,6 +64,7 @@ public class Son_Niveau_0 : MonoBehaviour {
         blockingRailScript = blockingRail.GetComponent<RailScriptV2>();
         timer = 0f;
         hitCount = 0;
+        
     }
 
 
@@ -94,6 +100,11 @@ public class Son_Niveau_0 : MonoBehaviour {
                 if (sources[0].clip != ComVX_N0_1_1)
                 {
                     setClip(ComVX_N0_1_1);
+
+                    speakers1.gameObject.SetActive(true);
+                    speakers2.gameObject.SetActive(false);
+                    railNiv1.gameObject.SetActive(true);
+                    railNiv2.gameObject.SetActive(false);
                 } else
                 {
                     if(sources[0].timeSamples >= ComVX_N0_1_1.samples - 5)
@@ -210,89 +221,6 @@ public class Son_Niveau_0 : MonoBehaviour {
 
             case actionExpected.Nothing:
                 break;
-                /*
-                 * Faut finir la porte avant d'attaquer ça
-            case actionExpected.OpenDoor:
-                if(sources[0].clip == ComVX_N0_3_2)
-                {
-                    if(Input.GetButtonDown("Fire1") || Input.inputString == "\n")
-                    {
-                        //
-                    }
-                }
-                break;
-                */
-
-            /*
-
-                break;
-            case actionExpected.moveHead1:
-                if (Quaternion.Angle(previousHeadRotation, Camera.main.transform.rotation) > minAngleForHeadMovement
-                    && source.clip != n0_002)
-                {
-                    source.clip = n0_002;
-                    source.Play();
-                }
-                if (source.clip == n0_002)
-                {
-                    if (source.timeSamples >= n0_002.samples)
-                    {
-                        nextAction = actionExpected.moveHead2;
-                        previousHeadRotation = Camera.main.transform.rotation;
-                    }
-                }
-                break;
-
-            case actionExpected.moveHead2:
-                if (Quaternion.Angle(previousHeadRotation, Camera.main.transform.rotation) > minAngleForHeadMovement
-                    && source.clip != n0_003)
-                {
-                    source.clip = n0_003;
-                    source.Play();
-                }
-                if (source.clip == n0_003)
-                {
-                    if (source.timeSamples >= n0_003.samples)
-                    {
-                        sonAiguillage.playActivation();
-                        ugoRailMovement.avanceDebloque = true;
-                        nextAction = actionExpected.moveForward;
-                    }
-                }
-                break;
-
-            case actionExpected.moveForward:
-                if (Input.GetAxis("Vertical") > 0
-                    && !(source.clip == n0_004 || source.clip == n0_005))
-                {
-                    source.clip = n0_004;
-                    source.Play();
-                }
-                if (source.clip == n0_004)
-                {
-                    if (source.timeSamples >= n0_004.samples)
-                    {
-                        source.clip = n0_005;
-                        source.Play();
-                    }
-                }
-                if (source.clip == n0_005)
-                {
-                    if (source.timeSamples >= n0_005.samples)
-                    {
-                        nextAction = actionExpected.activateDoor;
-                    }
-                }
-                break;
-
-            case actionExpected.activateDoor:
-                if (puzzle1Script.isDoorOpen && source.clip != n0_006)
-                {
-                    source.clip = n0_006;
-                    source.Play();
-                }
-                break;
-        */
         }
 
     }

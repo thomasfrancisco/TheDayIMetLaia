@@ -12,7 +12,7 @@ public class RailMovementV2 : MonoBehaviour
 
     public bool avanceDebloque;
     public bool reculeDebloque;
-
+    
     //boolean pour les sons avancer et reculer
     [HideInInspector]
     public bool isMovingForward;
@@ -61,6 +61,8 @@ public class RailMovementV2 : MonoBehaviour
         needDeathPoint = false;
         doAction = false;
         isAigMoving = false;
+        intersection = null;
+
 
         previous = firstRail.GetComponent<RailScriptV2>();
         next = previous.allRails[0];
@@ -89,7 +91,7 @@ public class RailMovementV2 : MonoBehaviour
         {
             if (!intersection.isBlocked)
             {
-                if(!isAigMoving)
+                if(!isAigMoving && !intersection.mute)
                     playSoundsRails();
                 sonAiguillage.playIntersection();
                 if (!needDeathPoint)

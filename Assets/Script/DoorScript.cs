@@ -31,6 +31,7 @@ public class DoorScript : MonoBehaviour {
     private AudioSource sourceSignal;
     private AudioSource sourceFeedback;
 
+    private RailMovementV2 ugoMovement;
 
     private void Awake()
     {
@@ -41,6 +42,7 @@ public class DoorScript : MonoBehaviour {
         sourceDoor = transform.Find("Son Porte").GetComponent<AudioSource>();
         sourceSignal = transform.Find("Tilt/Signal Electrique").GetComponent<AudioSource>();
         sourceFeedback = transform.Find("Tilt/FeedBack").GetComponent<AudioSource>();
+        ugoMovement = ugo.GetComponent<RailMovementV2>();
     }
 
     // Use this for initialization
@@ -69,15 +71,18 @@ public class DoorScript : MonoBehaviour {
                 {
                     if (isOnDoor)
                     {
+                        ugoMovement.doAction = false;
                         openingDoor();
                     } else
                     {
+                        ugoMovement.doAction = false;
                         sourceFeedback.clip = signalFail;
                         sourceFeedback.Play();
                     }
                 } else
                 {
                     isHatchOpen = true;
+                    ugoMovement.doAction = false;
                 }
             }
         }
@@ -102,6 +107,11 @@ public class DoorScript : MonoBehaviour {
         }
 		
 	}
+
+    public void closeDoor()
+    {
+        doorAnim.SetBool("isOpen?", false);
+    }
 
     private void openingDoor()
     {

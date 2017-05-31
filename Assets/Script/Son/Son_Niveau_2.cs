@@ -38,10 +38,15 @@ public class Son_Niveau_2 : MonoBehaviour {
     public AudioClip N2_8_5_1;
     public AudioClip N2_8_5_2;
 
+    public Transform previousSpeakers;
+    public Transform previousLevel;
+    public Transform previousDoor;
+    public Transform nextRail;
+    public Transform previousRail;
+
     public Transform triggerClosingDoor;
     public Transform railGlasses;
     public Transform railObstacleGlassHouse1;
-    public Transform triggerAnimalGlassHouse1;
     public Transform trigger1GlassHouse2;
     public Transform trigger2GlassHouse2;
     public Transform audiologGlassHouse3;
@@ -49,10 +54,10 @@ public class Son_Niveau_2 : MonoBehaviour {
     public Transform audiolog1GlassHouse5;
     public Transform audiolog2GlassHouse5;
     public Transform railObstacleExit;
+    public Transform relatedRailObstacle;
     public Transform railElevator;
     public Transform switchElevator;
     public Transform triggerPuzzleRoom;
-    public Transform panelPuzzle;
     public Transform puzzleSequence;
 
     public float timeBeforeAudiologReminder;
@@ -91,11 +96,11 @@ public class Son_Niveau_2 : MonoBehaviour {
     private SoundTemplate sound2_8_5_1;
     private SoundTemplate sound2_8_5_2;
 
+    private DoorScript previousDoorScript;
+
     private RailScriptV2 triggerClosingDoorScript;
     private RailScriptV2 railGlassesScript;
     private RailScriptV2 railObstacleGlassHouse1Script;
-    private RailScriptV2 trigger1GlassHouse2Script;
-    private RailScriptV2 trigger2GlassHouse2Script;
     private AudioLogBehaviour audiologGlassHouse3Script;
     private RailScriptV2 railCorpseScript;
     private AudioLogBehaviour audiolog1GlassHouse5Script;
@@ -103,7 +108,6 @@ public class Son_Niveau_2 : MonoBehaviour {
     private RailScriptV2 railObstacleExitScript;
     private RailScriptV2 railElevatorScript;
     private SwitchBehavior switchElevatorScript;
-    private RailScriptV2 triggerPuzzleRoomScript;
     private Puzzle2Script puzzleSequenceScript;
 
     private Transform ugo;
@@ -152,8 +156,22 @@ public class Son_Niveau_2 : MonoBehaviour {
         sound2_8_5_1 = new SoundTemplate(N2_8_5_1, sources);
         sound2_8_5_2 = new SoundTemplate(N2_8_5_2, sources);
 
+        previousDoorScript = previousDoor.GetComponent<DoorScript>();
+        triggerClosingDoorScript = triggerClosingDoor.GetComponent<RailScriptV2>();
+        railGlassesScript = railGlasses.GetComponent<RailScriptV2>();
+        railObstacleGlassHouse1Script = railObstacleGlassHouse1.GetComponent<RailScriptV2>();
+        audiologGlassHouse3Script = audiologGlassHouse3.GetComponent<AudioLogBehaviour>();
+        railCorpseScript = railCorpse.GetComponent<RailScriptV2>();
+        audiolog1GlassHouse5Script = audiolog1GlassHouse5.GetComponent<AudioLogBehaviour>();
+        audiolog2GlassHouse5Script = audiolog2GlassHouse5.GetComponent<AudioLogBehaviour>();
+        railObstacleExitScript = railObstacleExit.GetComponent<RailScriptV2>();
+        railElevatorScript = railElevator.GetComponent<RailScriptV2>();
+        switchElevatorScript = switchElevator.GetComponent<SwitchBehavior>();
+        puzzleSequenceScript = puzzleSequence.GetComponent<Puzzle2Script>();
+
+
         ugo = transform.Find("/Player");
-        ugoMovement = GetComponent<RailMovementV2>();
+        ugoMovement = ugo.GetComponent<RailMovementV2>();
         isDoorSeen = false;
         isElevatorSeen = false;
     }
@@ -164,6 +182,11 @@ public class Son_Niveau_2 : MonoBehaviour {
         {
             playSound(sound2_0_1);
             Debug.Log("Si aucun des membres de quart n’est debout ça m’étonnerait qu’on croise quiconque dans les serres mais sait-on jamais. Les scientifiques qui bossaient ici pendant le voyage étaient de vrais acharnés, convaincus du bien fondé de la mission. Je les vois mal abandonner leur poste et les réserves du vaisseau. Il y a plusieurs serres le long de la salle, tu devrais aller checker à l’intérieur.");
+            previousDoorScript.closeDoor();
+            previousRail.gameObject.SetActive(false);
+            //nextRail.gameObject.SetActive(true);
+            previousLevel.gameObject.SetActive(false);
+            previousSpeakers.gameObject.SetActive(false);
             triggerClosingDoorScript.southRail = null;
             triggerClosingDoorScript.oneWay = false;
             triggerClosingDoorScript.isBlocked = true;
@@ -205,13 +228,17 @@ public class Son_Niveau_2 : MonoBehaviour {
         {
             playSound(sound2_3_4);
             Debug.Log("Attends UGO, on ferait mieux d'écouter ce journal de bord jusqu'à la fin");
-        } else if (ugoMovement.getIntersection() == railCorpse && !sound2_4_1.isPlayed())
+        } else if (ugoMovement.getIntersection() == railCorpseScript && !sound2_4_1.isPlayed())
         {
             playSound(sound2_4_1);
             Debug.Log("Heu... Qu'est-ce qui s'est passé ici ? On dirait un... Non ce n'est sûrement pas ça.Je pense qu'il vaut mieux sortir d'ici UGO, ce n'est pas ici qu'on va trouver un moyen d'appeler à l'aide.");
         } else if (sound2_4_1.isFinished() && Input.GetAxis("Vertical") != 0 && !sound2_4_2.isPlayed())
         {
             playSound(sound2_4_2);
+            railObstacleExitScript.northRail = relatedRailObstacle;
+            railObstacleExitScript.isBlocked = false;
+            railObstacleExitScript.oneWay = true;
+            railObstacleExitScript.connectRails();
             Debug.Log("Là ! UGO ! Qu'est-ce que c'était ? On aurait dit un animal !");
         } else if (Vector3.Distance(ugo.position, audiolog1GlassHouse5.position) < audiolog1GlassHouse5Script.trigger_dist
             && !audiolog1GlassHouse5Script.audioLog_Played && isDoorSeen && !sound2_5_2.isPlayed())

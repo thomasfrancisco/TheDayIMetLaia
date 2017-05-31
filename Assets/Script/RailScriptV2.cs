@@ -17,6 +17,7 @@ public class RailScriptV2 : MonoBehaviour {
     public bool isSelected;
     public AigPosition aigPosition;
     public bool oneWay; //Ne bloque pas le joueur si il passe dessus
+    public bool mute;
 
     public AudioClip northSound;
     public AudioClip eastSound;

@@ -16,6 +16,10 @@ public class Son_Niveau_1 : MonoBehaviour {
     public AudioClip N1_5;
     public AudioClip N1_6_1;
 
+    public Transform previousSpeakers;
+    public Transform previousSoundAmb;
+    public Transform previousLevel;
+    public Transform firstDoor;
     public Transform railTriggerClosingDoor;
     public Transform railDouille;
     public Transform railObstacle;
@@ -25,6 +29,10 @@ public class Son_Niveau_1 : MonoBehaviour {
     public Transform railDoorClosed;
 
     public float delayBeforeUTurnReminder;
+
+    public Transform nextSpeakers;
+    public Transform nextRail;
+    public Transform previousRail;
 
     private List<AudioSource> sources;
     private SoundTemplate sound1_1_1;
@@ -40,6 +48,7 @@ public class Son_Niveau_1 : MonoBehaviour {
     private SoundTemplate sound1_5;
     private SoundTemplate sound1_6_1;
 
+    private DoorScript firstDoorScript;
     private RailScriptV2 railTriggerClosingDoorScript;
     private RailScriptV2 railDouilleScript;
     private RailScriptV2 railObstacleScript;
@@ -71,6 +80,7 @@ public class Son_Niveau_1 : MonoBehaviour {
         sound1_5 = new SoundTemplate(N1_5, sources);
         sound1_6_1 = new SoundTemplate(N1_6_1, sources);
 
+        firstDoorScript = firstDoor.GetComponent<DoorScript>();
         railTriggerClosingDoorScript = railTriggerClosingDoor.GetComponent<RailScriptV2>();
         railDouilleScript = railDouille.GetComponent<RailScriptV2>();
         railObstacleScript = railObstacle.GetComponent<RailScriptV2>();
@@ -90,8 +100,16 @@ public class Son_Niveau_1 : MonoBehaviour {
 	void Update () {
         if(Vector3.Distance(ugo.position, railTriggerClosingDoor.position) < 1f && ugo.position.z > railTriggerClosingDoor.position.z  && !sound1_1_1.isPlayed())
         {
+            previousSpeakers.gameObject.SetActive(false);
+            previousLevel.gameObject.SetActive(false);
+            previousSoundAmb.gameObject.SetActive(false);
+            nextSpeakers.gameObject.SetActive(true);
+            firstDoorScript.closeDoor();
+            nextRail.gameObject.SetActive(true);
+            previousRail.gameObject.SetActive(false);
             playSound(sound1_1_1);
             Debug.Log("On dirait bien qu'il ne reste qu'une direction... Elle ne va pas se rouvrir de suite");
+
             railTriggerClosingDoorScript.southRail = null;
             railTriggerClosingDoorScript.oneWay = false;
             railTriggerClosingDoorScript.isBlocked = true;

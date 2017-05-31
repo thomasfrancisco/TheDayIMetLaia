@@ -23,7 +23,8 @@ public class SwitchBehavior : MonoBehaviour
     private void Awake()
     {
         ugo = transform.Find("/Player");
-        script = linkPuzzle.GetComponent<Puzzle2Script>();
+        if(linkPuzzle != null)
+            script = linkPuzzle.GetComponent<Puzzle2Script>();
         source = GetComponent<AudioSource>();
         scriptMovement = ugo.GetComponent<RailMovementV2>();
         isHover = false;
