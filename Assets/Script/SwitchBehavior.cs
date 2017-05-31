@@ -35,6 +35,12 @@ public class SwitchBehavior : MonoBehaviour
 
     }
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.black;
+        Gizmos.DrawWireSphere(transform.position, minDistTrigger);
+    }
+
     // Update is called once per frame
     void Update()
     {

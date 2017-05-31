@@ -42,6 +42,14 @@ public class AudioLogBehaviour : MonoBehaviour
         }
     }
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.black;
+        Gizmos.DrawWireSphere(transform.position, trigger_dist);
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireSphere(transform.position, sound_dist);
+    }
+
     // Use this for initialization
     void Start()
     {
