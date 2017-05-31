@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AudioLogBehaviour : MonoBehaviour {
+public class AudioLogBehaviour : MonoBehaviour
+{
 
     public float trigger_angle;
     public float sound_dist;
@@ -23,7 +24,6 @@ public class AudioLogBehaviour : MonoBehaviour {
     private float distance;
     private bool isPlaying;
     private float timer;
-    private bool willPlay;
     private bool isSequence;
 
     private void Awake()
@@ -35,7 +35,6 @@ public class AudioLogBehaviour : MonoBehaviour {
         ugo = transform.Find("/Player");
         movementScript = ugo.GetComponent<RailMovementV2>();
         isPlaying = false;
-        willPlay = false;
         timer = 0f;
         if (!audioLog_Content)
         {
@@ -44,88 +43,97 @@ public class AudioLogBehaviour : MonoBehaviour {
     }
 
     // Use this for initialization
-    void Start () {
+    void Start()
+    {
         distance = Vector3.Distance(ugo.position, transform.position);
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
         distance = Vector3.Distance(ugo.position, transform.position);
         timer += Time.deltaTime;
 
-        if (isPlaying)
+        if (!isPlaying)
         {
-            if(source.timeSamples >= source.clip.samples - 5)
+            if (distance < trigger_dist)
             {
-                audioLog_Played = true;
-                isPlaying = false;
-            }
-        } else if (willPlay)
-        {
-            if(source.timeSamples >= source.clip.samples - 5)
-            {
-                willPlay = false;
-                isPlaying = true;
-                if (!isSequence)
+                if (timer > frequency)
                 {
-                    source.clip = audioLog_Content;
+                    if (!audioLog_Played)
+                        source.clip = soundNear;
+                    else
+                        source.clip = soundAlreadyPlayed;
                     source.Play();
-                } else
-                {
-                    StartCoroutine(playSequence());
-                }
-            }
-        } else if (distance < trigger_dist)
-        {
-            if(timer > frequency)
-            {
-                if (!audioLog_Played)
-                    source.clip = soundNear;
-                else
-                    source.clip = soundAlreadyPlayed;
-                source.Play();
-                timer = 0f;
-                
-            }
-            if(Input.inputString == "\n" || Input.GetButtonDown("Fire1"))
-            {
-                if (getAngleWithObject(transform) < trigger_angle)
-                {
-                    movementScript.doAction = false;
-                    
-                    source.clip = soundActivation;
-                    source.Play();
-                    willPlay = true;
-                }
-            }
+                    timer = 0f;
 
-        } else if (distance < sound_dist)
-        {
-            if(timer > frequency)
+                }
+                if (Input.inputString == "\n" || Input.GetButtonDown("Fire1"))
+                {
+                    if (getAngleWithObject(transform) < trigger_angle)
+                    {
+                        movementScript.doAction = false;
+                        source.clip = soundActivation;
+                        source.Play();
+                        if (isSequence)
+                        {
+                            StartCoroutine(playSequence(soundActivation.length));
+                        }
+                        else
+                        {
+                            StartCoroutine(playContent(soundActivation.length));
+                        }
+                    }
+                }
+
+            }
+            else if (distance < sound_dist)
             {
-                source.clip = soundFar;
-                source.Play();
-                timer = 0f;
+                if (timer > frequency)
+                {
+                    source.clip = soundFar;
+                    source.Play();
+                    timer = 0f;
+                }
             }
         }
-		
-	}
+
+    }
 
     private float getAngleWithObject(Transform target)
     {
         return Vector3.Angle(target.position - Camera.main.transform.position, Camera.main.transform.forward);
     }
-    
-    private IEnumerator playSequence()
+
+    private IEnumerator playContent(float time)
     {
         isFinished = false;
-        for(int i = 0; i < sequence.Length; i++)
+        isPlaying = true;
+        yield return new WaitForSeconds(time);
+        source.clip = audioLog_Content;
+        source.Play();
+        StartCoroutine(currentlyPlaying(audioLog_Content.length));
+    }
+    private IEnumerator currentlyPlaying(float time)
+    {
+        yield return new WaitForSeconds(time);
+        isPlaying = false;
+        isFinished = true;
+    }
+
+    private IEnumerator playSequence(float time)
+    {
+        isPlaying = true;
+        yield return new WaitForSeconds(time);
+        isFinished = false;
+        for (int i = 0; i < sequence.Length; i++)
         {
             source.clip = sequence[i];
             source.Play();
             yield return new WaitForSeconds(0.5f);
         }
         isFinished = true;
+        isPlaying = false;
     }
-    
+
 }

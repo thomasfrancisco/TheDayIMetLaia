@@ -49,6 +49,7 @@ public class RailMovementV2 : MonoBehaviour
     [HideInInspector]
     public bool doAction;
     private SonAction sonAction;
+    
 
     // Use this for initialization
     void Start()
@@ -74,6 +75,9 @@ public class RailMovementV2 : MonoBehaviour
         sonRoue = transform.FindChild("Roues").GetComponent<SonRoue>();
         sonAction = transform.FindChild("Action").GetComponent<SonAction>();
 
+        GvrViewer vr = new GvrViewer();
+        vr.Recenter();
+       
     }
 
     // Update is called once per frame

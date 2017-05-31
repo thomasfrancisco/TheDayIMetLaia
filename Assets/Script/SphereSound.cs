@@ -7,8 +7,10 @@ public class SphereSound : MonoBehaviour {
 
 
     public AudioClip[] sounds;
+    public AudioClip hover;
 
     private AudioSource source;
+    private AudioSource childSource;
     [HideInInspector]
     public int currentSound;
 
@@ -17,6 +19,7 @@ public class SphereSound : MonoBehaviour {
         currentSound = 0;
         source = GetComponent<AudioSource>();
         source.clip = sounds[currentSound];
+        childSource = transform.FindChild("hoverSound").GetComponent<AudioSource>();
     }
 
     // Use this for initialization
@@ -29,10 +32,27 @@ public class SphereSound : MonoBehaviour {
 		
 	}
 
+    public void playHover()
+    {
+        if (!childSource.isPlaying)
+        {
+            childSource.clip = hover;
+            childSource.Play();
+        }
+    }
+
+    public void stopHover()
+    {
+        if(childSource.isPlaying)
+        {
+            childSource.Stop();
+        }
+    }
+
     public void playSound()
     {
-        source.Play();
-
+        source.clip = sounds[currentSound];
+        source.Play();       
     }
 
     public void increaseSoundValue()

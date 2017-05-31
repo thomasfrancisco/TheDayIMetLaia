@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SwitchBehavior : MonoBehaviour {
+public class SwitchBehavior : MonoBehaviour
+{
 
     public float minDistTrigger;
     public float minAngle;
@@ -28,37 +29,45 @@ public class SwitchBehavior : MonoBehaviour {
         isHover = false;
     }
     // Use this for initialization
-    void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-            if (Vector3.Distance(ugo.position, transform.position) < minDistTrigger)
-            {
-                if (getAngleWithObject(transform) < minAngle)
-                {
-                    if (!isHover)
-                    {
-                        //source.clip = PUZ2_DoneSwitch_Hover;
-                        //source.Play();
-                        isHover = true;
-                    }
-                    if (Input.GetButtonDown("Fire1") || Input.inputString == "\n")
-                    {
-                        // source.clip = push
-                        scriptMovement.doAction = false;
-                        if(linkPuzzle != null)
-                            StartCoroutine(script.playSequence());
-                    }
+    void Start()
+    {
 
-                }
-                else
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (Vector3.Distance(ugo.position, transform.position) < minDistTrigger)
+        {
+            if (getAngleWithObject(transform) < minAngle)
+            {
+                if (!isHover)
                 {
-                    isHover = false;
+                    source.clip = PUZ2_DoneSwitch_Hover;
+                    source.Play();
+                    isHover = true;
                 }
+                if (Input.GetButtonDown("Fire1") || Input.inputString == "\n")
+                {
+                    scriptMovement.doAction = false;
+                    if (linkPuzzle != null)
+                        StartCoroutine(script.playSequence());
+                }
+
             }
-	}
+            else
+            {
+                isHover = false;
+                if (source.isPlaying)
+                    source.Stop();
+            }
+        } else
+        {
+            isHover = false;
+            if (source.isPlaying && source.clip == PUZ2_DoneSwitch_Hover)
+                source.Stop();
+        }
+    }
 
     private float getAngleWithObject(Transform target)
     {
@@ -67,15 +76,26 @@ public class SwitchBehavior : MonoBehaviour {
 
     public void playWin()
     {
+        source.volume = 1f;
         source.clip = PUZ2_Win;
         source.Play();
+        StartCoroutine(resetHover());
     }
 
     public void playFail()
     {
+        source.volume = 1f;
         source.clip = PUZ2_Fail;
         source.Play();
+        StartCoroutine(resetHover());
     }
-    
+
+    IEnumerator resetHover()
+    {
+        yield return new WaitForSeconds(1f);
+        isHover = false;
+        source.volume = .25f;
+    }
+
 
 }

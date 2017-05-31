@@ -5,7 +5,7 @@ using UnityEngine;
 public class Puzzle2Script : MonoBehaviour {
 
     public Transform switchButton;
-    public float detectionRange;
+    public Transform railDetection;
     public float hitAngle;
     public int[] sequence;
     public bool unlocked;
@@ -21,12 +21,15 @@ public class Puzzle2Script : MonoBehaviour {
     private AudioSource source;
     private bool panelHidden;
     private int nbMissed;
-    
 
+    private RailMovementV2 ugoMovement;
+    private RailScriptV2 railScript;
 
     private void Awake()
     {
         player = transform.Find("/Player");
+        ugoMovement = player.GetComponent<RailMovementV2>();
+        railScript = railDetection.GetComponent<RailScriptV2>();
         childSphere = new SphereSound[transform.childCount];
         for(int i = 0; i < transform.childCount; i++)
         {
@@ -47,13 +50,14 @@ public class Puzzle2Script : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if(Vector3.Distance(player.position, transform.position) < detectionRange)
+        if(ugoMovement.getIntersection() == railScript)
         {
             if (panelHidden)
             {
                 source.clip = PUZ2_Panel_Show;
                 source.Play();
                 panelHidden = false;
+                StartCoroutine(playSequenceDelayed());
             }
             atLeastOneHit = false;
            
@@ -61,6 +65,7 @@ public class Puzzle2Script : MonoBehaviour {
             {
                 if(Vector3.Angle(transform.GetChild(i).position - Camera.main.transform.position, Camera.main.transform.forward) < hitAngle)
                 {
+                    childSphere[i].playHover();
                     atLeastOneHit = true;
                     if (lastPlayed == null || lastPlayed != childSphere[i])
                     {
@@ -73,6 +78,9 @@ public class Puzzle2Script : MonoBehaviour {
                         childSphere[i].increaseSoundValue();
                         childSphere[i].playSound();
                     }
+                } else
+                {
+                    childSphere[i].stopHover();
                 }
             } 
         } else if (!panelHidden)
@@ -80,10 +88,25 @@ public class Puzzle2Script : MonoBehaviour {
             source.clip = PUZ2_Panel_Hide;
             source.Play();
             panelHidden = true;
+            foreach (var child in childSphere)
+            {
+                child.stopHover();
+                
+            }
         }
 
         if (!atLeastOneHit) lastPlayed = null;
 	}
+
+    public IEnumerator playSequenceDelayed()
+    {
+        yield return new WaitForSeconds(1f);
+        for(int i = 0; i < childSphere.Length; i++)
+        {
+            childSphere[i].playSound();
+            yield return new WaitForSeconds(0.5f);
+        } 
+    }
 
     public IEnumerator playSequence(bool check = true)
     {
@@ -97,7 +120,7 @@ public class Puzzle2Script : MonoBehaviour {
             if (checkWin())
             {
                 switchBehavior.playWin();
-                yield return new WaitForSeconds(switchBehavior.PUZ2_Win.length);
+                yield return new WaitForSeconds(switchBehavior.PUZ2_Win.length - 5f);
                 unlocked = true;
             } else
             {

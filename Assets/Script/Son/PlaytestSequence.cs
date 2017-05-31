@@ -74,37 +74,29 @@ public class PlaytestSequence : MonoBehaviour {
 
         if (!sound1.isPlayed())
         {
-            Debug.Log("Je vais t’expliquer le fonctionnement du puzzle de mémorisation. Pour commencer, fais demi-tour. Pour cela, tu dois orienter ta tête dans la direction opposée. Une fois que c’est fait, avance droit devant toi.");
             playSound(sound1);
         } else if (ugoMovement.getIntersection() == railAudiologScript
             && !sound2.isPlayed() && sound1.isPlayed() && !sound3.isPlayed())
         {
-            Debug.Log("Ok. Devant toi, il doit y avoir un AudioLog. Tu dois entendre un son qui t’indique où il est. Essaye de l’allumer.");
             playSound(sound2);
         } else if (audiologScript.isFinished && !sound3.isPlayed()) { 
-            Debug.Log("Hum, j’ai l’impression que cette séquence est importante. Si tu veux la réécouter, tu peux relancer l’audioLog. Quand tu as bien entendu la suite de notes, fais demi-tour et avance droit devant toi.");
             playSound(sound3);
         } else if (ugoMovement.getIntersection() == railSwitchScript
             && audiologScript.isFinished && !sound4.isPlayed())
         {
-            Debug.Log("Voilà un tableau avec différents interrupteurs. Tu vas devoir reproduire la séquence que tu viens d’entendre en orientant ta tête vers les interrupteurs. Quand tu as terminé de reproduire la séquence, oriente-toi vers la droite, il y a un bouton de validation sur lequel il faut appuyer.");
             playSound(sound4);
         } else if (currentLevel < transform.childCount && puzScripts[currentLevel].getNbMissed() == 1 && !sound5.isPlayed() && sound1.isPlayed() && sound2.isPlayed() && sound3.isPlayed() && sound4.isPlayed())
         {
-            Debug.Log("Ca n’a pas l’air d’être la bonne séquence… Chaque interrupteur doit correspondre à un des sons de la séquence. N’oublie pas de valider avec le bouton qui se trouve à ta droite.");
             playSound(sound5);
         } else if (currentLevel < transform.childCount && puzScripts[currentLevel].getNbMissed() == 3
             && !sound6.isPlayed() && sound1.isPlayed() && sound2.isPlayed() && sound3.isPlayed() && sound4.isPlayed() && sound5.isPlayed())
         {
-            Debug.Log("J’ai l’impression qu’il faut appuyer plusieurs fois sur chaque interrupteur pour arriver au bon son. Si tu as oublié la séquence, n’hésite pas à retourner en arrière et à écouter l’audioLog encore une fois.");
             playSound(sound6);
         } else if(currentLevel == 1 && !sound7.isPlayed())
         {
-            Debug.Log("Super ! Je crois qu’il y a encore des séquences à reproduire. Le tableau d’interrupteur a été modifié, va écouter l’audioLog pour reproduire la nouvelle séquence.");
             playSound(sound7);
         } else if(currentLevel == transform.childCount && !sound8.isPlayed())
         {
-            Debug.Log("Génial ! Tu as réussi à reproduire toutes les séquences !");
             playSound(sound8);
         }
            
