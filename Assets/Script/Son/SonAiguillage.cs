@@ -7,9 +7,13 @@ public class SonAiguillage : MonoBehaviour {
     public AudioClip activationSound;
     public AudioClip accrocheSound;
     public AudioClip decrocheSound;
-    public AudioClip validationSound;
-    public AudioClip mouvementSound;
+    public AudioClip validation;
+    public AudioClip mouvement;
 
+    private SoundTemplate validationSound;
+    private SoundTemplate mouvementSound;
+
+    private bool isCurrentlyMoving;
     
     private AudioSource source;
 
@@ -17,10 +21,13 @@ public class SonAiguillage : MonoBehaviour {
 
     private void Awake()
     {
+        isCurrentlyMoving = false;
         source = GetComponent<AudioSource>();
         source.playOnAwake = false;
         source.loop = false;
         hasPlayed = false;
+        validationSound = new SoundTemplate(validation, source);
+        mouvementSound = new SoundTemplate(mouvement, source);
     }
     // Use this for initialization
     void Start () {
@@ -44,26 +51,29 @@ public class SonAiguillage : MonoBehaviour {
 
     public bool playMouvement()
     {
-        if(source.clip == validationSound)
+        if (!validationSound.isPlayed())
         {
-            if(source.timeSamples == source.clip.samples)
-            {
-                source.clip = mouvementSound;
-                source.Play();
-            }
-        } else if (source.clip == mouvementSound)
-        {
-            if(source.timeSamples == source.clip.samples)
-            {
-                source.clip = null;
-                return true;
-            }
-        } else
-        {
-            source.clip = validationSound;
-            source.Play();
+            isCurrentlyMoving = true;
+            StartCoroutine(routineValidation());
         }
-        return false;
+        return !isCurrentlyMoving;
+    }
+
+    private IEnumerator routineValidation()
+    {
+        validationSound.play();
+        yield return new WaitForSeconds(validation.length);
+        StartCoroutine(routineMouvement());
+    }
+
+    private IEnumerator routineMouvement()
+    {
+        mouvementSound.play();
+        yield return new WaitForSeconds(mouvement.length);
+        isCurrentlyMoving = false;
+        yield return new WaitForSeconds(.5f);
+        validationSound.setIsPlayed(false);
+        mouvementSound.setIsPlayed(false);
     }
 
     public void playDecroche()

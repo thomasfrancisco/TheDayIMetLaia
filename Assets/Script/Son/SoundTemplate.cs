@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SoundTemplate : MonoBehaviour{
+public class SoundTemplate {
     private AudioClip _clip; //Clip a jouer
     private bool _isPlayed;
     private List<AudioSource> _sources; //S'il y en a plusieurs
