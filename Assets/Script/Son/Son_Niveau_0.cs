@@ -29,6 +29,19 @@ public class Son_Niveau_0 : MonoBehaviour {
     public AudioClip ComVX_N0_3_4;
     public AudioClip ComVX_N0_3_5;
 
+    private SoundTemplate sound0_1_1;
+    private SoundTemplate sound0_1_2;
+    private SoundTemplate sound0_1_3;
+    private SoundTemplate sound0_1_4;
+    private SoundTemplate sound0_2_1;
+    private SoundTemplate sound0_2_2;
+    private SoundTemplate sound0_2_3;
+    private SoundTemplate sound0_3_1;
+    private SoundTemplate sound0_3_2;
+    private SoundTemplate sound0_3_3;
+    private SoundTemplate sound0_3_4;
+    private SoundTemplate sound0_3_5;
+
 
     public Transform puzzle1;
     public Transform ugo;
@@ -41,7 +54,7 @@ public class Son_Niveau_0 : MonoBehaviour {
     public Transform railNiv1;
     public Transform railNiv2;
 
-    private AudioSource[] sources;
+    private List<AudioSource> sources;
     public actionExpected nextAction;
     private DoorScript doorScript;
     private RailMovementV2 ugoRailMovement;
@@ -70,169 +83,100 @@ public class Son_Niveau_0 : MonoBehaviour {
 
     private void initialiserSources()
     {
-        sources = GetComponentsInChildren<AudioSource>();
-        for (int i = 0; i < sources.Length; i++)
-        {
-            sources[i].playOnAwake = false;
-            sources[i].loop = false;
-        }
-        
-    }
+        sources = new List<AudioSource>(GetComponentsInChildren<AudioSource>());
+        sound0_1_1 = new SoundTemplate(ComVX_N0_1_1, sources);
+        sound0_1_2 = new SoundTemplate(ComVX_N0_1_2, sources);
+        sound0_1_3 = new SoundTemplate(ComVX_N0_1_3, sources);
+        sound0_1_4 = new SoundTemplate(ComVX_N0_1_4, sources);
+        sound0_2_1 = new SoundTemplate(ComVX_N0_2_1, sources);
+        sound0_2_2 = new SoundTemplate(ComVX_N0_2_2, sources);
+        sound0_2_3 = new SoundTemplate(ComVX_N0_2_3, sources);
+        sound0_3_1 = new SoundTemplate(ComVX_N0_3_1, sources);
+        sound0_3_2 = new SoundTemplate(ComVX_N0_3_2, sources);
+        sound0_3_3 = new SoundTemplate(ComVX_N0_3_3, sources);
+        sound0_3_4 = new SoundTemplate(ComVX_N0_3_4, sources);
+        sound0_3_5 = new SoundTemplate(ComVX_N0_3_5, sources);
 
-    private void setClip(AudioClip clip, bool play = true)
-    {
         
-        for(int i=0; i < sources.Length; i++)
-        {
-            sources[i].clip = clip;
-            if (play)
-                sources[i].Play();
-        }
     }
 
     // Update is called once per frame
     void Update()
     {
-
-        switch (nextAction)
+        if (!sound0_1_1.isPlayed())
         {
-            case actionExpected.Intro:
-                if (sources[0].clip != ComVX_N0_1_1)
-                {
-                    setClip(ComVX_N0_1_1);
-
-                    speakers1.gameObject.SetActive(true);
-                    speakers2.gameObject.SetActive(false);
-                    railNiv1.gameObject.SetActive(true);
-                    railNiv2.gameObject.SetActive(false);
-                } else
-                {
-                    if(sources[0].timeSamples >= ComVX_N0_1_1.samples - 5)
-                    {
-                        nextAction = actionExpected.TurnLeft;
-                        previousHeadRotationY = Camera.main.transform.rotation.y;
-                    }
-                }
-                break;
-
-            case actionExpected.TurnLeft:
-                if(Camera.main.transform.rotation.y < previousHeadRotationY - minAngleHead
-                    && sources[0].clip != ComVX_N0_1_3)
-                {
-                    setClip(ComVX_N0_1_3);
-                }
-                if(sources[0].clip == ComVX_N0_1_3)
-                {
-                    if(sources[0].timeSamples >= ComVX_N0_1_3.samples - 5)
-                    {
-                        nextAction = actionExpected.TurnRight;
-                        previousHeadRotationY = Camera.main.transform.rotation.y;
-                        timer = 0f;
-                    }
-                } else if(timer > timeBeforeRepeat && sources[0].clip != ComVX_N0_1_2)
-                {
-                    if(!sources[0].isPlaying)
-                        setClip(ComVX_N0_1_2);
-                }
-                timer += Time.deltaTime;
-                break;
-
-            case actionExpected.TurnRight:
-                if(Camera.main.transform.rotation.y > previousHeadRotationY + minAngleHead
-                    && sources[0].clip != ComVX_N0_2_1)
-                {
-                    setClip(ComVX_N0_2_1);
-                }
-
-                if(sources[0].clip == ComVX_N0_2_1)
-                {
-                    if(sources[0].timeSamples >= ComVX_N0_2_1.samples - 5)
-                    {
-                        nextAction = actionExpected.Wait;
-                        timer = 0f;
-                    }
-                } else if (timer > timeBeforeRepeat && sources[0].clip != ComVX_N0_1_4)
-                {
-                    if (!sources[0].isPlaying)
-                        setClip(ComVX_N0_1_4);
-                }
-                timer += Time.deltaTime;
-                break;
-
-            case actionExpected.Wait:
-                sonAiguillage.playActivation();
-                StartCoroutine(wait(1f));
-               
-                break;
-
-            case actionExpected.Move:
-                if(Input.GetAxis("Vertical") != 0 && sources[0].clip != ComVX_N0_3_1)
-                {
-                    setClip(ComVX_N0_3_1);
-                }
-                if(sources[0].clip == ComVX_N0_3_1)
-                {
-                    if(sources[0].timeSamples >= ComVX_N0_3_1.samples - 5)
-                    {
-                        nextAction = actionExpected.HitDoor;
-                        timer = 0f;
-                    }
-                } else if(timer > timeBeforeRepeat && sources[0].clip != ComVX_N0_2_3)
-                {
-                    if (!sources[0].isPlaying)
-                        setClip(ComVX_N0_2_3);
-                }
-                timer += Time.deltaTime;
-                break;
-
-            case actionExpected.HitDoor:
-                if (blockingRailScript.isCollided)
-                {
-                    setClip(ComVX_N0_3_2);
-                    nextAction = actionExpected.OpenDoor;
-                }
-                break;
-
-
-            case actionExpected.OpenDoor:
-                if(doorScript.isHatchOpen && sources[0].clip == ComVX_N0_3_2)
-                {
-                    setClip(ComVX_N0_3_3);
-                } else
-                {
-                    if (doorScript.isDoorOpen)
-                    {
-                        setClip(ComVX_N0_3_5);
-                        nextAction = actionExpected.Nothing;
-                    } else
-                    {
-                        if(Input.GetButtonDown("Fire1") || Input.inputString == "\n")
-                        {
-                            hitCount++;
-                            if(hitCount > 2 && sources[0].clip != ComVX_N0_3_4)
-                            {
-                                setClip(ComVX_N0_3_4);
-                            }
-                        }
-                    }
-                }
-                break;
-
-
-            case actionExpected.Nothing:
-                break;
+            playSound(sound0_1_1);
+            StartCoroutine(reminder(ComVX_N0_1_1, sound0_1_2, sound0_1_3));
+            previousHeadRotationY = Camera.main.transform.rotation.y;
         }
 
+        if(sound0_1_1.isPlayed() && Camera.main.transform.rotation.y < previousHeadRotationY - minAngleHead
+            && !sound0_1_3.isPlayed() && sound0_1_1.isFinished())
+        {
+            playSound(sound0_1_3);
+            StartCoroutine(reminder(ComVX_N0_1_3, sound0_1_4, sound0_2_1));
+            previousHeadRotationY = Camera.main.transform.rotation.y;
+        }
+        
+        if(sound0_1_3.isPlayed() && Camera.main.transform.rotation.y > previousHeadRotationY + minAngleHead
+            && !sound0_2_1.isPlayed() && sound0_1_3.isFinished())
+        {
+            playSound(sound0_2_1);
+            StartCoroutine(playRailActivation(ComVX_N0_2_1.length));
+        }
+
+        if(sound0_2_2.isPlayed() && ugoRailMovement.isMovingForward && !sound0_3_1.isPlayed())
+        {
+            playSound(sound0_3_1);
+        }
+
+        if(ugoRailMovement.getIntersection() == blockingRailScript && !sound0_3_2.isPlayed())
+        {
+            playSound(sound0_3_2);
+        }
+
+        if(doorScript.isHatchOpen && !sound0_3_3.isPlayed())
+        {
+            playSound(sound0_3_3);
+        }
+
+        if(doorScript.getNbMissed() == 3 && !sound0_3_4.isPlayed())
+        {
+            playSound(sound0_3_4);
+        }
+
+        if(doorScript.isDoorOpen && !sound0_3_5.isPlayed())
+        {
+            playSound(sound0_3_5);
+        }
     }
 
-    IEnumerator wait(float seconds)
+    private void playSound(SoundTemplate sound)
     {
-        yield return new WaitForSeconds(seconds);
-        setClip(ComVX_N0_2_2);
+        sound.play();
+        StartCoroutine(sound.endOfClip(0f));
+    }
+
+    private IEnumerator reminder(AudioClip clipToEnd, SoundTemplate soundToPlay, SoundTemplate soundToTest)
+    {
+        yield return new WaitForSeconds(timeBeforeRepeat + clipToEnd.length);
+        if (!soundToTest.isPlayed())
+        {
+            playSound(soundToPlay);
+        }
+    }
+
+    private IEnumerator playRailActivation(float time)
+    {
+        yield return new WaitForSeconds(time);
+        sonAiguillage.playActivation();
         ugoRailMovement.avanceDebloque = true;
         ugoRailMovement.reculeDebloque = true;
-        timer = 0f;
-        nextAction = actionExpected.Move;
+        yield return new WaitForSeconds(sonAiguillage.activationSound.length);
+        playSound(sound0_2_2);
+        StartCoroutine(reminder(ComVX_N0_2_2, sound0_2_3, sound0_3_1));
     }
+
+    
     
 }
