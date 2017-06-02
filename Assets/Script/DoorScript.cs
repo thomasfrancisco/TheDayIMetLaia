@@ -33,6 +33,8 @@ public class DoorScript : MonoBehaviour {
 
     private RailMovementV2 ugoMovement;
 
+    private int nbMissed;
+
     private void Awake()
     {
         tiltAnim = transform.FindChild("Tilt").GetComponent<Animator>();
@@ -43,6 +45,7 @@ public class DoorScript : MonoBehaviour {
         sourceSignal = transform.Find("Tilt/Signal Electrique").GetComponent<AudioSource>();
         sourceFeedback = transform.Find("Tilt/FeedBack").GetComponent<AudioSource>();
         ugoMovement = ugo.GetComponent<RailMovementV2>();
+        nbMissed = 0;
     }
 
     // Use this for initialization
@@ -78,6 +81,7 @@ public class DoorScript : MonoBehaviour {
                         ugoMovement.doAction = false;
                         sourceFeedback.clip = signalFail;
                         sourceFeedback.Play();
+                        nbMissed++;
                     }
                 } else
                 {
@@ -107,6 +111,11 @@ public class DoorScript : MonoBehaviour {
         }
 		
 	}
+
+    public int getNbMissed()
+    {
+        return nbMissed;
+    }
 
     public void closeDoor()
     {
