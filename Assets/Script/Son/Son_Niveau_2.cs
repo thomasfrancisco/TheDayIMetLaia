@@ -237,7 +237,7 @@ public class Son_Niveau_2 : MonoBehaviour
 
         }
         if (Vector3.Distance(ugo.position, audiologGlassHouse3.position) > audiologGlassHouse3Script.trigger_dist
-                   && sound2_3_1.isPlayed() && !audiologGlassHouse3Script.isFinished && !sound2_3_4.isPlayed())
+                   && sound2_3_1.isPlayed() && audiologGlassHouse3Script.audioLog_Played  && !audiologGlassHouse3Script.isFinished && !sound2_3_4.isPlayed())
         {
             playSound(sound2_3_4);
 
