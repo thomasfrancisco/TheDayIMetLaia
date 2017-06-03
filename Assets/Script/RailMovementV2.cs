@@ -110,7 +110,8 @@ public class RailMovementV2 : MonoBehaviour
                             if (nextTrack())
                             {
                                 sonAiguillage.reset();
-                                sonAiguillage.playDecroche();
+                                if(!intersection.mute)
+                                    sonAiguillage.playDecroche();
                                 intersection.resetNextRailSound();
                                 inactivityTimer = 0f;
                             }
@@ -452,6 +453,8 @@ public class RailMovementV2 : MonoBehaviour
                     return;
                 }
             }
+            // o.O' ?
+            intersectionLookingAt = intersection.transform;
         }
 
     }

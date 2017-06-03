@@ -83,8 +83,9 @@ public class SonMoteur : MonoBehaviour {
             source.loop = false;
             source.Play();
             timeLoop = 0f;
+            StartCoroutine(forwardLoop());
         }
-
+        /*
         else if (UgoMovementScript.isMovingForward && lastUgoForwardState && ugoState == UgoState.forward)
         {
             timeLoop += Time.deltaTime;
@@ -101,26 +102,36 @@ public class SonMoteur : MonoBehaviour {
                 }
             }
         }
-
+        */
         else if (!UgoMovementScript.isMovingForward && !lastUgoForwardState && ugoState == UgoState.forward)
         {
             //Fin
             if (source.clip == moveForwardStart || source.clip == moveForwardLoop)
             {
-                if (timeLoop > minTimeToEnd)
-                {
+                //if (timeLoop > minTimeToEnd)
+                //{
                     source.clip = moveForwardEnd;
                     source.loop = false;
                     source.Play();
                     ugoState = UgoState.none;
-                } else
-                {
-                    source.Stop();
-                }
+                //} else
+                //{
+                //    source.Stop();
+                //}
             }
         }
     }
 
+    IEnumerator forwardLoop()
+    {
+        yield return new WaitForSeconds(moveForwardStart.length);
+        if(UgoMovementScript.isMovingForward && lastUgoForwardState && ugoState == UgoState.forward)
+        {
+            source.clip = moveForwardLoop;
+            source.loop = true;
+            source.Play();
+        }
+    }
 
     //S'enclenche lorsqu'Ugo se déplace vers l'arrier
     void backwardSound()
@@ -133,8 +144,10 @@ public class SonMoteur : MonoBehaviour {
             source.loop = false;
             source.Play();
             timeLoop = 0f;
+            StartCoroutine(backwardLoop());
 
-        } else if(UgoMovementScript.isMovingBackward && lastUgoBackwardState && ugoState == UgoState.backward)
+        }
+        /*else if(UgoMovementScript.isMovingBackward && lastUgoBackwardState && ugoState == UgoState.backward)
         {
             //Loop
             timeLoop += Time.deltaTime;
@@ -149,22 +162,35 @@ public class SonMoteur : MonoBehaviour {
                 }
             }
 
-        } else if(!UgoMovementScript.isMovingBackward && !lastUgoBackwardState && ugoState == UgoState.backward)
+        }
+        */
+        else if(!UgoMovementScript.isMovingBackward && !lastUgoBackwardState && ugoState == UgoState.backward)
         {
             //End
             if(source.clip == moveBackwardStart || source.clip == moveBackwardLoop)
             {
-                if(timeLoop > minTimeToEnd)
-                {
+                //if(timeLoop > minTimeToEnd)
+                //{
                     source.clip = moveBackwardEnd;
                     source.loop = false;
                     source.Play();
                     ugoState = UgoState.none;
-                } else
-                {
-                    source.Stop();
-                }
+                //} else
+                //{
+                //    source.Stop();
+                //}
             }
+        }
+    }
+
+    IEnumerator backwardLoop()
+    {
+        yield return new WaitForSeconds(moveBackwardStart.length);
+        if(UgoMovementScript.isMovingBackward && lastUgoBackwardState && ugoState == UgoState.backward)
+        {
+            source.clip = moveBackwardLoop;
+            source.loop = true;
+            source.Play();
         }
     }
     
