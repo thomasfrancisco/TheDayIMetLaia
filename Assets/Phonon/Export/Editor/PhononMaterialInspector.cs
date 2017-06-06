@@ -31,7 +31,6 @@ namespace Phonon
                 PhononMaterialValue actualValue = ((PhononMaterial)target).Value;
                 actualValue.CopyFrom(PhononMaterialPresetList.PresetValue(serializedObject.FindProperty("Preset").enumValueIndex));
             }
-
             else
             {
                 PhononGUI.SectionHeader("Custom Material");

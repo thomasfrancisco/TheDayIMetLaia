@@ -64,7 +64,7 @@ namespace Phonon
                 Debug.Log("COMPLETED: Baking effect for \"" + bakedStaticListener.uniqueIdentifier + "\".");
             }
 
-            bakedStatsFoldout = EditorGUILayout.Foldout(bakedStatsFoldout, "Baked Static Listener Node Statistics", true);
+            bakedStatsFoldout = EditorGUILayout.Foldout(bakedStatsFoldout, "Baked Static Listener Node Statistics");
             if (bakedStatsFoldout)
                 BakedStaticListenerNodeStatsGUI();
             serializedObject.ApplyModifiedProperties();

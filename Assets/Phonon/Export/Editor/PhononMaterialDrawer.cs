@@ -21,7 +21,7 @@ namespace Phonon
         //
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            return 64f;
+            return 112f;
         }
 
         //
@@ -44,6 +44,12 @@ namespace Phonon
             EditorGUI.PropertyField(position, property.FindPropertyRelative("HighFreqAbsorption"));
             position.y += 16f;
             EditorGUI.PropertyField(position, property.FindPropertyRelative("Scattering"));
+            position.y += 16f;
+            EditorGUI.PropertyField(position, property.FindPropertyRelative("LowFreqTransmission"));
+            position.y += 16f;
+            EditorGUI.PropertyField(position, property.FindPropertyRelative("MidFreqTransmission"));
+            position.y += 16f;
+            EditorGUI.PropertyField(position, property.FindPropertyRelative("HighFreqTransmission"));
         }
     }
 }

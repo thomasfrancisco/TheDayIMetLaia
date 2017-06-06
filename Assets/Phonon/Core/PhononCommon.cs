@@ -216,6 +216,9 @@ namespace Phonon
         public float absorptionMid;
         public float absorptionHigh;
         public float scattering;
+        public float transmissionLow;
+        public float transmissionMid;
+        public float transmissionHigh;
     }
 
     // Choose a scene type.
@@ -234,12 +237,20 @@ namespace Phonon
         TrueAudioNext
     }
 
-    // Choose an occlusion option for direct sound.
-    public enum OcclusionOption
+    // Choose an occlusion algorithm for direct sound.
+    public enum OcclusionMethod
     {
-        None,
         Raycast,
         Partial
+    }
+
+    // Choose an occlusion algorithm for direct sound.
+    public enum OcclusionMode
+    {
+        NoOcclusion,
+        OcclusionWithNoTransmission,
+        OcclusionWithFrequencyIndependentTransmission,
+        OcclusionWithFrequencyDependentTransmission
     }
 
     public enum SimulationType
@@ -313,6 +324,18 @@ namespace Phonon
         public float[] airAbsorption;
         public float propagationDelay;
         public float occlusionFactor;
+        public float transmissionFactorLow;
+        public float transmissionFactorMid;
+        public float transmissionFactorHigh;
+    }
+
+    // Direct Sound Effect options.
+    [StructLayout(LayoutKind.Sequential)]
+    public struct DirectSoundEffectOptions
+    {
+        public Bool applyDistanceAttenuation;
+        public Bool applyAirAbsorption;
+        public OcclusionMode occlusionMode;
     }
 
     //

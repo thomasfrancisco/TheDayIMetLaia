@@ -10,23 +10,33 @@ namespace Phonon
         public void Initialize(AudioFormat audioFormat)
         {
             // Assumes Phonon Manager is not null.
-            directAttnLerp.Init(directAttnLerpFrames);
             inputFormat = audioFormat;
             outputFormat = audioFormat;
         }
 
         // Initializes various Phonon API objects in a lazy fashion.
         // Safe to call this every frame.
-        public void LazyInitialize(BinauralRenderer binauralRenderer, bool directBinauralEnabled)
+        public void LazyInitialize(BinauralRenderer binauralRenderer, bool directBinauralEnabled, 
+            RenderingSettings renderingSettings, EnvironmentalRenderer environmentalRenderer)
         {
             if (directBinauralEffect == IntPtr.Zero && outputFormat.channelLayout == ChannelLayout.Stereo
                 && directBinauralEnabled && binauralRenderer.GetBinauralRenderer() != IntPtr.Zero)
             {
                 // Create object based binaural effect for direct sound if the output format is stereo.
-                if (PhononCore.iplCreateBinauralEffect(binauralRenderer.GetBinauralRenderer(), inputFormat, 
+                if (PhononCore.iplCreateBinauralEffect(binauralRenderer.GetBinauralRenderer(), outputFormat, 
                     outputFormat, ref directBinauralEffect) != Error.None)
                 {
                     Debug.Log("Unable to create binaural effect. Please check the log file for details.");
+                    return;
+                }
+            }
+
+            if (directSoundEffect == IntPtr.Zero && environmentalRenderer.GetEnvironmentalRenderer() != IntPtr.Zero)
+            {
+                if (PhononCore.iplCreateDirectSoundEffect(environmentalRenderer.GetEnvironmentalRenderer(), inputFormat,
+                    outputFormat, ref directSoundEffect) != Error.None)
+                {
+                    Debug.Log("Unable to create direct sound effect. Please check the log file for details.");
                     return;
                 }
             }
@@ -36,7 +46,7 @@ namespace Phonon
             {
                 // Panning effect for direct sound (used for rendering only for custom speaker layout, 
                 // otherwise use default Unity panning)
-                if (PhononCore.iplCreatePanningEffect(binauralRenderer.GetBinauralRenderer(), inputFormat, 
+                if (PhononCore.iplCreatePanningEffect(binauralRenderer.GetBinauralRenderer(), outputFormat, 
                     outputFormat, ref directCustomPanningEffect) != Error.None)
                 {
                     Debug.Log("Unable to create custom panning effect. Please check the log file for details.");
@@ -47,25 +57,24 @@ namespace Phonon
 
         public void Destroy()
         {
-            directAttnLerp.Reset();
-
             PhononCore.iplDestroyBinauralEffect(ref directBinauralEffect);
             directBinauralEffect = IntPtr.Zero;
 
             PhononCore.iplDestroyPanningEffect(ref directCustomPanningEffect);
             directCustomPanningEffect = IntPtr.Zero;
+
+            PhononCore.iplDestroyDirectSoundEffect(ref directSoundEffect);
+            directSoundEffect = IntPtr.Zero;
         }
 
         public void AudioFrameUpdate(float[] data, int channels, bool physicsBasedAttenuation, float directMixFraction, 
-            bool directBinauralEnabled, HRTFInterpolation hrtfInterpolation)
+            bool directBinauralEnabled, bool applyAirAbsorption, HRTFInterpolation hrtfInterpolation, 
+            OcclusionMode directOcclusionMode, OcclusionMethod directOcclusionMethod)
         {
-            float distanceAttenuation = (physicsBasedAttenuation) ? directSoundPath.distanceAttenuation : 1f;
-            directAttnLerp.Set(directSoundPath.occlusionFactor * directMixFraction * distanceAttenuation);
-
-            float perSampleIncrement;
-            int numFrames = data.Length / channels;
-            float attnFactor = directAttnLerp.Update(out perSampleIncrement, numFrames);
-            Vector3 directDirection = directSoundPath.direction;
+            DirectSoundEffectOptions directSoundEffectOptions;
+            directSoundEffectOptions.applyDistanceAttenuation = physicsBasedAttenuation ? Bool.True : Bool.False;        
+            directSoundEffectOptions.applyAirAbsorption = applyAirAbsorption ? Bool.True : Bool.False;
+            directSoundEffectOptions.occlusionMode = directOcclusionMode;
 
             AudioBuffer inputBuffer;
             inputBuffer.audioFormat = inputFormat;
@@ -79,25 +88,26 @@ namespace Phonon
             outputBuffer.deInterleavedBuffer = null;
             outputBuffer.interleavedBuffer = data;
 
+            for (int i = 0; i < data.Length; i++)
+            {
+                data[i] *= directMixFraction;
+            }
+
+            PhononCore.iplApplyDirectSoundEffect(directSoundEffect, inputBuffer, directSoundPath,
+                directSoundEffectOptions, outputBuffer);
+
+            Vector3 directDirection = directSoundPath.direction;
             if ((outputFormat.channelLayout == ChannelLayout.Stereo) && directBinauralEnabled)
             {
                 // Apply binaural audio to direct sound.
-                PhononCore.iplApplyBinauralEffect(directBinauralEffect, inputBuffer, directDirection, hrtfInterpolation, 
-                    outputBuffer);
+                PhononCore.iplApplyBinauralEffect(directBinauralEffect, outputBuffer, directDirection,
+                    hrtfInterpolation, outputBuffer);
             }
             else if (outputFormat.channelLayout == ChannelLayout.Custom)
             {
                 // Apply panning fo custom speaker layout.
-                PhononCore.iplApplyPanningEffect(directCustomPanningEffect, inputBuffer, directDirection, outputBuffer);
-            }
-
-            // Process direct sound occlusion
-            for (int i = 0, count = 0; i < numFrames; ++i)
-            {
-                for (int j = 0; j < channels; ++j, ++count)
-                    data[count] *= attnFactor;
-
-                attnFactor += perSampleIncrement;
+                PhononCore.iplApplyPanningEffect(directCustomPanningEffect, outputBuffer, directDirection,
+                    outputBuffer);
             }
         }
 
@@ -105,25 +115,25 @@ namespace Phonon
         {
             PhononCore.iplFlushBinauralEffect(directBinauralEffect);
             PhononCore.iplFlushPanningEffect(directCustomPanningEffect);
+            PhononCore.iplFlushDirectSoundEffect(directSoundEffect);
         }
 
         public void FrameUpdate(IntPtr envRenderer, Vector3 sourcePosition, Vector3 listenerPosition, 
-            Vector3 listenerAhead, Vector3 listenerUp, float partialOcclusionRadius, OcclusionOption directOcclusionOption)
+            Vector3 listenerAhead, Vector3 listenerUp, float partialOcclusionRadius, OcclusionMode directOcclusionMode,
+            OcclusionMethod directOcclusionMethod)
         {
             directSoundPath = PhononCore.iplGetDirectSoundPath(envRenderer, listenerPosition, listenerAhead, listenerUp, 
-                sourcePosition, partialOcclusionRadius, directOcclusionOption);
+                sourcePosition, partialOcclusionRadius, directOcclusionMode, directOcclusionMethod);
         }
 
         AudioFormat inputFormat;
         AudioFormat outputFormat;
-        DirectSoundPath directSoundPath;
 
-        // Per sample interpolator.
-        AttenuationInterpolator directAttnLerp = new AttenuationInterpolator();
-        int directAttnLerpFrames = 4;
+        DirectSoundPath directSoundPath;
 
         // Phonon API related variables.
         IntPtr directBinauralEffect = IntPtr.Zero;
         IntPtr directCustomPanningEffect = IntPtr.Zero;
+        IntPtr directSoundEffect = IntPtr.Zero;
     }
 }

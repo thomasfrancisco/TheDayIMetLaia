@@ -77,7 +77,8 @@ namespace Phonon
         {
             if (phononManager != null && phononContainer != null)
             {
-                directSimulator.LazyInitialize(phononContainer.BinauralRenderer(), directBinauralEnabled);
+                directSimulator.LazyInitialize(phononContainer.BinauralRenderer(), directBinauralEnabled,
+                    phononManager.RenderingSettings(), phononContainer.EnvironmentalRenderer());
 
                 indirectSimulator.LazyInitialize(phononContainer.BinauralRenderer(), enableReflections,
                     indirectBinauralEnabled, phononManager.RenderingSettings(), true, sourceSimulationType,
@@ -115,7 +116,7 @@ namespace Phonon
 
                 if (!errorLogged && phononManager != null && phononContainer != null 
                     && phononContainer.Scene().GetScene() == IntPtr.Zero
-                    && ((directOcclusionOption != OcclusionOption.None) || enableReflections))
+                    && ((directOcclusionMode != OcclusionMode.NoOcclusion) || enableReflections))
                 {
                     Debug.LogError("Scene not found. Make sure to pre-export the scene.");
                     errorLogged = true;
@@ -125,14 +126,15 @@ namespace Phonon
                 {
                     UpdateRelativeDirection();
                     directSimulator.FrameUpdate(phononContainer.EnvironmentalRenderer().GetEnvironmentalRenderer(),
-                        sourcePosition, listenerPosition, listenerAhead, listenerUp, partialOcclusionRadius, directOcclusionOption);
+                        sourcePosition, listenerPosition, listenerAhead, listenerUp, partialOcclusionRadius, 
+                        directOcclusionMode, directOcclusionMethod);
                     indirectSimulator.FrameUpdate(true, sourceSimulationType, ReverbSimulationType.RealtimeReverb,
                         phononManager.PhononStaticListener(), phononManager.PhononListener());
 
                     initialized = true;
                 }
 
-                yield return new WaitForEndOfFrame();   // Must yield after updating the relative direction.
+                yield return waitForEndOfFrame;   // Must yield after updating the relative direction.
             }
         }
 
@@ -177,11 +179,15 @@ namespace Phonon
                                 indirectBinauralEnabled, phononManager.PhononListener());
 
             directSimulator.AudioFrameUpdate(data, channels, physicsBasedAttenuation, directMixFraction, 
-                directBinauralEnabled, hrtfInterpolation);
+                directBinauralEnabled, airAbsorption, hrtfInterpolation, directOcclusionMode, directOcclusionMethod);
 
             if (wetData != null && wetData.Length != 0)
+            {
                 for (int i = 0; i < data.Length; ++i)
+                {
                     data[i] += wetData[i];
+                }
+            }
 
             mutex.ReleaseMutex();
         }
@@ -270,10 +276,12 @@ namespace Phonon
         // Public fields - direct sound.
         public bool directBinauralEnabled = true;
         public HRTFInterpolation hrtfInterpolation;
-        public OcclusionOption directOcclusionOption;
+        public OcclusionMode directOcclusionMode;
+        public OcclusionMethod directOcclusionMethod;
         [Range(.1f, 32f)]
         public float partialOcclusionRadius = 1.0f;
-        public bool physicsBasedAttenuation = true;
+        public bool physicsBasedAttenuation = false;
+        public bool airAbsorption = false;
         [Range(.0f, 1.0f)]
         public float directMixFraction = 1.0f;
 
@@ -318,5 +326,7 @@ namespace Phonon
 
         DirectSimulator directSimulator = new DirectSimulator();
         IndirectSimulator indirectSimulator = new IndirectSimulator();
+
+        WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
     }
 }

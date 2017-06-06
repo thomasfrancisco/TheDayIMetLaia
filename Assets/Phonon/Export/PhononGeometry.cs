@@ -52,7 +52,13 @@ namespace Phonon
             return numTriangles;
         }
 
-        public void GetGeometry(Vector3[] vertices, int vertexOffset, Triangle[] triangles, int triangleOffset)
+        public int GetNumMaterials()
+        {
+            return GetComponentsInChildren<PhononMaterial>().Length;
+        }
+
+        public void GetGeometry(Vector3[] vertices, ref int vertexOffset, Triangle[] triangles, ref int triangleOffset,
+                                Material[] materials, int[] materialIndices, ref int materialOffset)
         {
             var localVertexOffset = 0;
             var localTriangleOffset = 0;
@@ -63,6 +69,15 @@ namespace Phonon
 
             FixupTriangleIndices(triangles, triangleOffset, localTriangleOffset, numTrianglesExported,
                 vertexOffset + localVertexOffset);
+
+            // Check if current game object with Phonon Geometry component has a Phonon Material.
+            // If yes, add the material to scene and update material indices. Ensure the children use this material.
+            // If no, the material should be set to Global Material (index 0).
+            var materialIndex = GetMaterial(gameObject, ref materials[materialOffset]) ? materialOffset++ : 0;
+            for (int i = 0; i < numTrianglesExported; ++i)
+            {
+                materialIndices[i + localTriangleOffset + triangleOffset] = materialIndex;
+            }
 
             localVertexOffset += numVerticesExported;
             localTriangleOffset += numTrianglesExported;
@@ -80,6 +95,15 @@ namespace Phonon
 
                         FixupTriangleIndices(triangles, triangleOffset, localTriangleOffset, numTrianglesExported,
                             vertexOffset + localVertexOffset);
+
+                        // Check if a child game object with Mesh Filter has a Phonon Material.
+                        // If yes, use that material.
+                        // If no, use the material of its parent which has Phonon Geometry component.
+                        var childrenMaterialIndex = GetMaterial(mesh.gameObject, ref materials[materialOffset]) ? materialOffset++ : materialIndex;
+                        for (int i = 0; i < numTrianglesExported; ++i)
+                        {
+                            materialIndices[i + localTriangleOffset + triangleOffset] = childrenMaterialIndex;
+                        }
 
                         localVertexOffset += numVerticesExported;
                         localTriangleOffset += numTrianglesExported;
@@ -99,25 +123,42 @@ namespace Phonon
                         FixupTriangleIndices(triangles, triangleOffset, localTriangleOffset, numTrianglesExported,
                             vertexOffset + localVertexOffset);
 
+                        // Check if a child game object with Mesh Filter has a Phonon Material.
+                        // If yes, use that material.
+                        // If no, use the material of its parent which has Phonon Geometry component.
+                        var childrenMaterialIndex = GetMaterial(terrain.gameObject, ref materials[materialOffset]) ? materialOffset++ : materialIndex;
+                        for (int i = 0; i < numTrianglesExported; ++i)
+                        {
+                            materialIndices[i + localTriangleOffset + triangleOffset] = childrenMaterialIndex;
+                        }
+
                         localVertexOffset += numVerticesExported;
                         localTriangleOffset += numTrianglesExported;
                     }
                 }
             }
+
+            vertexOffset += localVertexOffset;
+            triangleOffset += localTriangleOffset;
         }
 
         // Sets material to the Phonon Material component attached to the object.
         // material is unchanged if no Phonon Material component is attached.
-        public void GetMaterial(ref Material material)
+        // Returns true if a material has been set.
+        public bool GetMaterial(GameObject meshObject, ref Material material)
         {
-            var attachedMaterial = GetComponent<PhononMaterial>();
+            var attachedMaterial = meshObject.GetComponent<PhononMaterial>();
             if (attachedMaterial == null)
-                return;
+                return false;
 
             material.absorptionLow = attachedMaterial.Value.LowFreqAbsorption;
             material.absorptionMid = attachedMaterial.Value.MidFreqAbsorption;
             material.absorptionHigh = attachedMaterial.Value.HighFreqAbsorption;
             material.scattering = attachedMaterial.Value.Scattering;
+            material.transmissionLow = attachedMaterial.Value.LowFreqTransmission;
+            material.transmissionMid = attachedMaterial.Value.MidFreqTransmission;
+            material.transmissionHigh = attachedMaterial.Value.HighFreqTransmission;
+            return true;
         }
 
         int GetNumVerticesForMesh(MeshFilter mesh)

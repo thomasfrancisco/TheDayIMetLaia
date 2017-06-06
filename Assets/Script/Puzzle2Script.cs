@@ -5,7 +5,7 @@ using UnityEngine;
 public class Puzzle2Script : MonoBehaviour {
 
     public Transform switchButton;
-    public Transform railDetection;
+    public float radiusDetection;
     public float hitAngle;
     public int[] sequence;
     public bool unlocked;
@@ -23,13 +23,11 @@ public class Puzzle2Script : MonoBehaviour {
     private int nbMissed;
 
     private RailMovementV2 ugoMovement;
-    private RailScriptV2 railScript;
 
     private void Awake()
     {
         player = transform.Find("/Player");
         ugoMovement = player.GetComponent<RailMovementV2>();
-        railScript = railDetection.GetComponent<RailScriptV2>();
         childSphere = new SphereSound[transform.childCount];
         for(int i = 0; i < transform.childCount; i++)
         {
@@ -43,14 +41,15 @@ public class Puzzle2Script : MonoBehaviour {
         nbMissed = 0;
     }
 
-    // Use this for initialization
-    void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-        if(ugoMovement.getIntersection() == railScript)
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, radiusDetection);
+    }
+
+    // Update is called once per frame
+    void Update () {
+        if(Vector3.Distance(player.position, transform.position) < radiusDetection)
         {
             if (panelHidden)
             {

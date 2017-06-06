@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DoorScript : MonoBehaviour {
 
-    public Transform ugo;
+
     public float radiusDetection;
     public Transform relatedBlockedRail;
     public Transform nextRail;
@@ -31,12 +31,14 @@ public class DoorScript : MonoBehaviour {
     private AudioSource sourceSignal;
     private AudioSource sourceFeedback;
 
+    private Transform ugo;
     private RailMovementV2 ugoMovement;
 
     private int nbMissed;
 
     private void Awake()
     {
+        ugo = transform.Find("/Player");
         tiltAnim = transform.FindChild("Tilt").GetComponent<Animator>();
         doorAnim = GetComponent<Animator>();
         relatedScript = relatedBlockedRail.GetComponent<RailScriptV2>();
@@ -47,6 +49,13 @@ public class DoorScript : MonoBehaviour {
         ugoMovement = ugo.GetComponent<RailMovementV2>();
         nbMissed = 0;
     }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, radiusDetection);
+    }
+
 
     // Use this for initialization
     void Start () {
@@ -120,6 +129,11 @@ public class DoorScript : MonoBehaviour {
     public void closeDoor()
     {
         doorAnim.SetBool("isOpen?", false);
+    }
+
+    public void openDoor()
+    {
+        doorAnim.SetBool("isOpen?", true);
     }
 
     private void openingDoor()

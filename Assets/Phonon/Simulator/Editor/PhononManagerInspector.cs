@@ -51,21 +51,11 @@ namespace Phonon
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(" ");
 
-            bool exportOBJ = false;
-            bool exportScene = false;
-
             if (GUILayout.Button("Export to OBJ"))
-                exportOBJ = true;
+                phononManager.ExportScene(true);
             if (GUILayout.Button("Pre-Export Scene"))
-                exportScene = true;
+                phononManager.ExportScene(false);
 
-            if (exportOBJ || exportScene)
-            {
-                if (exportScene)
-                    phononManager.ExportScene();
-                if (exportOBJ)
-                    phononManager.DumpScene();
-            }
             EditorGUILayout.EndHorizontal();
 
             // Simulation Settings
@@ -90,13 +80,13 @@ namespace Phonon
 
             // Fold Out for Advanced Settings
             PhononGUI.SectionHeader("Advanced Options");
-            phononManager.showLoadTimeOptions = EditorGUILayout.Foldout(phononManager.showLoadTimeOptions, "Per Frame Query Optimization", true);
+            phononManager.showLoadTimeOptions = EditorGUILayout.Foldout(phononManager.showLoadTimeOptions, "Per Frame Query Optimization");
             if (phononManager.showLoadTimeOptions)
             {
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("updateComponents"));
             }
 
-            phononManager.showMassBakingOptions = EditorGUILayout.Foldout(phononManager.showMassBakingOptions, "Consolidated Baking Options", true);
+            phononManager.showMassBakingOptions = EditorGUILayout.Foldout(phononManager.showMassBakingOptions, "Consolidated Baking Options");
             if (phononManager.showMassBakingOptions)
             {
                 bool noSettingMessage = false;
@@ -108,6 +98,8 @@ namespace Phonon
                 if (!noSettingMessage)
                     EditorGUILayout.LabelField("Scene does not contain any baking related components.");
             }
+
+            EditorGUILayout.HelpBox("Do not manually add Phonon Manager component. Click Window > Phonon.", MessageType.Info);
 
             EditorGUILayout.Space();
             serializedObject.ApplyModifiedProperties();

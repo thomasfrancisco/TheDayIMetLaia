@@ -36,24 +36,22 @@ namespace Phonon
             }
 
             probeManager.Create();
+            scene.Create(computeDevice, simulationSettings, globalContext);
 
-            if (scene.Create(computeDevice, simulationSettings, globalContext) == Error.None)
+            try
             {
-                try
-                {
-                    environment.Create(computeDevice, simulationSettings, scene, probeManager, globalContext);
-                }
-                catch (Exception e)
-                {
-                    throw e;
-                }
-
-                if (initializeRenderer)
-                    environmentRenderer.Create(environment, renderingSettings, simulationSettings, globalContext);
+                environment.Create(computeDevice, simulationSettings, scene, probeManager, globalContext);
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
 
             if (initializeRenderer)
+            {
+                environmentRenderer.Create(environment, renderingSettings, simulationSettings, globalContext);
                 binauralRenderer.Create(environment, renderingSettings, globalContext);
+            }
         }
 
         // Destroys Phonon Manager.

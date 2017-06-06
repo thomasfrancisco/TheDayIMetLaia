@@ -46,7 +46,7 @@ namespace Phonon
                     if (phononListener.reverbSimulationType == ReverbSimulationType.BakedReverb)
                     {
                         BakedReverbGUI();
-                        bakedStatsFoldout = EditorGUILayout.Foldout(bakedStatsFoldout, "Baked Reverb Statistics", true);
+                        bakedStatsFoldout = EditorGUILayout.Foldout(bakedStatsFoldout, "Baked Reverb Statistics");
                         if (bakedStatsFoldout)
                             BakedReverbStatsGUI();
                     }

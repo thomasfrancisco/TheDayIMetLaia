@@ -17,47 +17,31 @@ namespace Phonon
             return scene;
         }
 
-        public Error Export(ComputeDevice computeDevice, SimulationSettings simulationSettings, PhononMaterialValue defaultMaterial, GlobalContext globalContext)
+        public Error Export(ComputeDevice computeDevice, SimulationSettings simulationSettings, 
+            PhononMaterialValue defaultMaterial, GlobalContext globalContext, bool exportOBJ = false)
         {
             var error = Error.None;
 
             var objects = GameObject.FindObjectsOfType<PhononGeometry>();
+            var totalNumVertices = 0;
+            var totalNumTriangles = 0;
+            var totalNumMaterials = 1;  // Global material.
 
-            simulationSettings.sceneType = SceneType.Phonon;    // Scene type should always be Phonon when exporting the scene.
+            for (var i = 0; i < objects.Length; ++i)
+            {
+                totalNumVertices += objects[i].GetNumVertices();
+                totalNumTriangles += objects[i].GetNumTriangles();
+                totalNumMaterials += objects[i].GetNumMaterials();
+            }
+
+            simulationSettings.sceneType = SceneType.Phonon;    // Scene type should always be Phonon when exporting.
+
             error = PhononCore.iplCreateScene(globalContext, computeDevice.GetDevice(), simulationSettings,
-                objects.Length, ref scene);
+                totalNumMaterials, ref scene);
             if (error != Error.None)
             {
                 throw new Exception("Unable to create scene for export (" + objects.Length.ToString() +
                     " materials): [" + error.ToString() + "]");
-            }
-
-            var materials = new Material[objects.Length];
-
-            for (var i = 0; i < objects.Length; ++i)
-            {
-                materials[i].absorptionHigh = defaultMaterial.HighFreqAbsorption;
-                materials[i].absorptionMid = defaultMaterial.MidFreqAbsorption;
-                materials[i].absorptionLow = defaultMaterial.LowFreqAbsorption;
-                materials[i].scattering = defaultMaterial.Scattering;
-
-                objects[i].GetMaterial(ref materials[i]);
-                PhononCore.iplSetSceneMaterial(scene, i, materials[i]);
-            }
-
-            var totalNumVertices = 0;
-            var numVertices = new int[objects.Length];
-
-            var totalNumTriangles = 0;
-            var numTriangles = new int[objects.Length];
-
-            for (var i = 0; i < objects.Length; ++i)
-            {
-                numVertices[i] = objects[i].GetNumVertices();
-                totalNumVertices += numVertices[i];
-
-                numTriangles[i] = objects[i].GetNumTriangles();
-                totalNumTriangles += numTriangles[i];
             }
 
             var staticMesh = IntPtr.Zero;
@@ -69,22 +53,32 @@ namespace Phonon
             }
 
             var vertices = new Vector3[totalNumVertices];
-            var vertexOffset = 0;
-
             var triangles = new Triangle[totalNumTriangles];
+            var materialIndices = new int[totalNumTriangles];
+            var materials = new Material[totalNumMaterials + 1];    // Offset added to avoid creating Material
+                                                                    // for each object and then copying it.
+
+            var vertexOffset = 0;
             var triangleOffset = 0;
 
-            var materialIndices = new int[totalNumTriangles];
+            var materialOffset = 1;
+            materials[0].absorptionHigh = defaultMaterial.HighFreqAbsorption;
+            materials[0].absorptionMid = defaultMaterial.MidFreqAbsorption;
+            materials[0].absorptionLow = defaultMaterial.LowFreqAbsorption;
+            materials[0].scattering = defaultMaterial.Scattering;
+            materials[0].transmissionHigh = defaultMaterial.HighFreqTransmission;
+            materials[0].transmissionMid = defaultMaterial.MidFreqTransmission;
+            materials[0].transmissionLow = defaultMaterial.LowFreqTransmission;
 
             for (var i = 0; i < objects.Length; ++i)
             {
-                objects[i].GetGeometry(vertices, vertexOffset, triangles, triangleOffset);
+                objects[i].GetGeometry(vertices, ref vertexOffset, triangles, ref triangleOffset, materials, 
+                    materialIndices, ref materialOffset);
+            }
 
-                for (var j = 0; j < numTriangles[i]; ++j)
-                    materialIndices[triangleOffset + j] = i;
-
-                vertexOffset += numVertices[i];
-                triangleOffset += numTriangles[i];
+            for (var i = 0; i < totalNumMaterials; ++i)
+            {
+                PhononCore.iplSetSceneMaterial(scene, i, materials[i]);
             }
 
             PhononCore.iplSetStaticMeshVertices(scene, staticMesh, vertices);
@@ -98,108 +92,24 @@ namespace Phonon
                 UnityEditor.AssetDatabase.CreateFolder("Assets", "StreamingAssets");
 #endif
 
-            error = PhononCore.iplSaveFinalizedScene(scene, Common.ConvertString(SceneFileName()));
-            if (error != Error.None)
+            if (exportOBJ)
             {
-                throw new Exception("Unable to save scene to " + SceneFileName() + " [" + error.ToString() + "]");
+                PhononCore.iplDumpSceneToObjFile(scene, Common.ConvertString(ObjFileName()));
+                Debug.Log("Scene dumped to " + ObjFileName() + ".");
+            }
+            else
+            {
+                error = PhononCore.iplSaveFinalizedScene(scene, Common.ConvertString(SceneFileName()));
+                if (error != Error.None)
+                {
+                    throw new Exception("Unable to save scene to " + SceneFileName() + " [" + error.ToString() + "]");
+                }
+
+                Debug.Log("Scene exported to " + SceneFileName() + ".");
             }
 
             PhononCore.iplDestroyStaticMesh(ref staticMesh);
             PhononCore.iplDestroyScene(ref scene);
-
-            Debug.Log("Scene exported to " + SceneFileName() + ".");
-
-            return error;
-        }
-
-        public Error DumpToObj(ComputeDevice computeDevice, SimulationSettings simulationSettings, PhononMaterialValue defaultMaterial, GlobalContext globalContext)
-        {
-            var error = Error.None;
-
-            var objects = GameObject.FindObjectsOfType<PhononGeometry>();
-
-            simulationSettings.sceneType = SceneType.Phonon;    // Scene type should always be Phonon when exporting the scene.
-            error = PhononCore.iplCreateScene(globalContext, computeDevice.GetDevice(), simulationSettings,
-                objects.Length, ref scene);
-            if (error != Error.None)
-            {
-                throw new Exception("Unable to create scene for export (" + objects.Length.ToString() +
-                    " materials): [" + error.ToString() + "]");
-            }
-
-            var materials = new Material[objects.Length];
-
-            for (var i = 0; i < objects.Length; ++i)
-            {
-                materials[i].absorptionHigh = defaultMaterial.HighFreqAbsorption;
-                materials[i].absorptionMid = defaultMaterial.MidFreqAbsorption;
-                materials[i].absorptionLow = defaultMaterial.LowFreqAbsorption;
-                materials[i].scattering = defaultMaterial.Scattering;
-
-                objects[i].GetMaterial(ref materials[i]);
-                PhononCore.iplSetSceneMaterial(scene, i, materials[i]);
-            }
-
-            var totalNumVertices = 0;
-            var numVertices = new int[objects.Length];
-
-            var totalNumTriangles = 0;
-            var numTriangles = new int[objects.Length];
-
-            for (var i = 0; i < objects.Length; ++i)
-            {
-                numVertices[i] = objects[i].GetNumVertices();
-                totalNumVertices += numVertices[i];
-
-                numTriangles[i] = objects[i].GetNumTriangles();
-                totalNumTriangles += numTriangles[i];
-            }
-
-            var staticMesh = IntPtr.Zero;
-            error = PhononCore.iplCreateStaticMesh(scene, totalNumVertices, totalNumTriangles, ref staticMesh);
-            if (error != Error.None)
-            {
-                throw new Exception("Unable to create static mesh for export (" + totalNumVertices.ToString() +
-                    " vertices, " + totalNumTriangles.ToString() + " triangles): [" + error.ToString() + "]");
-            }
-
-            var vertices = new Vector3[totalNumVertices];
-            var vertexOffset = 0;
-
-            var triangles = new Triangle[totalNumTriangles];
-            var triangleOffset = 0;
-
-            var materialIndices = new int[totalNumTriangles];
-
-            for (var i = 0; i < objects.Length; ++i)
-            {
-                objects[i].GetGeometry(vertices, vertexOffset, triangles, triangleOffset);
-
-                for (var j = 0; j < numTriangles[i]; ++j)
-                    materialIndices[triangleOffset + j] = i;
-
-                vertexOffset += numVertices[i];
-                triangleOffset += numTriangles[i];
-            }
-
-            PhononCore.iplSetStaticMeshVertices(scene, staticMesh, vertices);
-            PhononCore.iplSetStaticMeshTriangles(scene, staticMesh, triangles);
-            PhononCore.iplSetStaticMeshMaterials(scene, staticMesh, materialIndices);
-
-            PhononCore.iplFinalizeScene(scene, null);
-
-#if UNITY_EDITOR
-            if (!Directory.Exists(Application.streamingAssetsPath))
-                UnityEditor.AssetDatabase.CreateFolder("Assets", "StreamingAssets");
-#endif
-
-            PhononCore.iplDumpSceneToObjFile(scene, Common.ConvertString(ObjFileName()));
-
-            PhononCore.iplDestroyStaticMesh(ref staticMesh);
-            PhononCore.iplDestroyScene(ref scene);
-
-            Debug.Log("Scene dumped to " + ObjFileName() + ".");
-
             return error;
         }
 
@@ -227,32 +137,32 @@ namespace Phonon
             var streamingAssetsFileName = Path.Combine(Application.streamingAssetsPath, fileName);
 
 #if UNITY_ANDROID && !UNITY_EDITOR
-			      var tempFileName = Path.Combine(Application.temporaryCachePath, fileName);
+            var tempFileName = Path.Combine(Application.temporaryCachePath, fileName);
 
             if (File.Exists(tempFileName))
                 File.Delete(tempFileName);
 
-      			try
-			      {
-	              var streamingAssetLoader = new WWW(streamingAssetsFileName);
+                try
+                  {
+                  var streamingAssetLoader = new WWW(streamingAssetsFileName);
                 while (!streamingAssetLoader.isDone);
-				        if (string.IsNullOrEmpty(streamingAssetLoader.error))
-				        {
-					          var assetData = streamingAssetLoader.bytes;
-					          using (var dataWriter = new BinaryWriter(new FileStream(tempFileName, FileMode.Create)))
-					          {
-						            dataWriter.Write(assetData);
-						            dataWriter.Close();
-					          }
-				        }
-				        else
-				        {
-					          Debug.Log(streamingAssetLoader.error);
-				        }
+                        if (string.IsNullOrEmpty(streamingAssetLoader.error))
+                        {
+                              var assetData = streamingAssetLoader.bytes;
+                              using (var dataWriter = new BinaryWriter(new FileStream(tempFileName, FileMode.Create)))
+                              {
+                                    dataWriter.Write(assetData);
+                                    dataWriter.Close();
+                              }
+                        }
+                        else
+                        {
+                              Debug.Log(streamingAssetLoader.error);
+                        }
             }
             catch (Exception exception)
             {
-			          Debug.LogError(exception.ToString());
+                      Debug.LogError(exception.ToString());
             }
             return tempFileName;
 #else

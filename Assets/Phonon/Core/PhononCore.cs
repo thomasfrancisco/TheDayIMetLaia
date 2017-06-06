@@ -218,7 +218,23 @@ namespace Phonon
         //
 
         [DllImport("phonon")]
-        public static extern DirectSoundPath iplGetDirectSoundPath(IntPtr renderer, Vector3 listenerPosition, Vector3 listenerAhead, Vector3 listenerUp, Vector3 sourcePosition, float sourceRadius, OcclusionOption occlusionMethod);
+        public static extern DirectSoundPath iplGetDirectSoundPath(IntPtr renderer, Vector3 listenerPosition, Vector3 listenerAhead, Vector3 listenerUp, Vector3 sourcePosition, float sourceRadius, OcclusionMode occlusionMode, OcclusionMethod occlusionMethod);
+
+        //
+        // Direct Sound Effect.
+        //
+
+        [DllImport("phonon")]
+        public static extern Error iplCreateDirectSoundEffect(IntPtr renderer, AudioFormat inputFormat, AudioFormat outputFormat, [In, Out] ref IntPtr effect);
+
+        [DllImport("phonon")]
+        public static extern void iplDestroyDirectSoundEffect([In, Out] ref IntPtr effect);
+
+        [DllImport("phonon")]
+        public static extern void iplApplyDirectSoundEffect(IntPtr effect, AudioBuffer inputAudio, DirectSoundPath directSoundPath, DirectSoundEffectOptions directSoundEffectOptions, AudioBuffer outputAudio);
+
+        [DllImport("phonon")]
+        public static extern void iplFlushDirectSoundEffect(IntPtr effect);
 
         //
         // Convolution Effect.

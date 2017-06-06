@@ -154,7 +154,8 @@ namespace Phonon
 
             // Input data is sent (where it is copied) for indirect propagation effect processing.
             // This data must be sent before applying any other effect to the input audio.
-            if (enableReflections && (wetData != null) && (wetDataMarshal != null) && (wetAmbisonicsDataMarshal != null) && (propagationAmbisonicsEffect != IntPtr.Zero))
+            if (enableReflections && (wetData != null) && (wetDataMarshal != null) 
+                && (wetAmbisonicsDataMarshal != null) && (propagationAmbisonicsEffect != IntPtr.Zero))
             {
                 for (int i = 0; i < data.Length; ++i)
                     wetData[i] = data[i] * indirectMixFraction;
@@ -165,7 +166,8 @@ namespace Phonon
                 propagationInputBuffer.deInterleavedBuffer = null;
                 propagationInputBuffer.interleavedBuffer = wetData;
 
-                PhononCore.iplSetDryAudioForConvolutionEffect(propagationAmbisonicsEffect, sourcePosition, propagationInputBuffer);
+                PhononCore.iplSetDryAudioForConvolutionEffect(propagationAmbisonicsEffect, sourcePosition, 
+                    propagationInputBuffer);
 
                 if (fourierMixingEnabled)
                 {
@@ -178,19 +180,26 @@ namespace Phonon
                 wetAmbisonicsBuffer.numSamples = data.Length / channels;
                 wetAmbisonicsBuffer.deInterleavedBuffer = wetAmbisonicsDataMarshal;
                 wetAmbisonicsBuffer.interleavedBuffer = null;
-                PhononCore.iplGetWetAudioForConvolutionEffect(propagationAmbisonicsEffect, listenerPosition, listenerAhead, listenerUp, wetAmbisonicsBuffer);
+                PhononCore.iplGetWetAudioForConvolutionEffect(propagationAmbisonicsEffect, listenerPosition, 
+                    listenerAhead, listenerUp, wetAmbisonicsBuffer);
 
                 AudioBuffer wetBufferMarshal;
                 wetBufferMarshal.audioFormat = outputFormat;
-                wetBufferMarshal.audioFormat.channelOrder = ChannelOrder.Deinterleaved;     // Set format to deinterleave.
+                wetBufferMarshal.audioFormat.channelOrder = ChannelOrder.Deinterleaved;
                 wetBufferMarshal.numSamples = data.Length / channels;
                 wetBufferMarshal.deInterleavedBuffer = wetDataMarshal;
                 wetBufferMarshal.interleavedBuffer = null;
 
                 if ((outputFormat.channelLayout == ChannelLayout.Stereo) && indirectBinauralEnabled)
-                    PhononCore.iplApplyAmbisonicsBinauralEffect(propagationBinauralEffect, wetAmbisonicsBuffer, wetBufferMarshal);
+                {
+                    PhononCore.iplApplyAmbisonicsBinauralEffect(propagationBinauralEffect, wetAmbisonicsBuffer,
+                        wetBufferMarshal);
+                }
                 else
-                    PhononCore.iplApplyAmbisonicsPanningEffect(propagationPanningEffect, wetAmbisonicsBuffer, wetBufferMarshal);
+                {
+                    PhononCore.iplApplyAmbisonicsPanningEffect(propagationPanningEffect, wetAmbisonicsBuffer, 
+                        wetBufferMarshal);
+                }
 
                 AudioBuffer wetBuffer;
                 wetBuffer.audioFormat = outputFormat;
@@ -207,16 +216,23 @@ namespace Phonon
         }
 
         public void FrameUpdate(bool sourceUpdate, SourceSimulationType sourceSimulationType, 
-            ReverbSimulationType reverbSimulationType, PhononStaticListener phononStaticListener, PhononListener phononListener)
+            ReverbSimulationType reverbSimulationType, PhononStaticListener phononStaticListener, 
+            PhononListener phononListener)
         {
-            if (sourceUpdate && sourceSimulationType == SourceSimulationType.BakedStaticListener && phononStaticListener != null 
-                && phononStaticListener.currentStaticListenerNode != null)
+            if (sourceUpdate && sourceSimulationType == SourceSimulationType.BakedStaticListener 
+                && phononStaticListener != null && phononStaticListener.currentStaticListenerNode != null)
+            {
                 UpdateEffectName(phononStaticListener.currentStaticListenerNode.GetUniqueIdentifier());
+            }
 
             if (phononListener && phononListener.acceleratedMixing)
+            {
                 fourierMixingEnabled = true;
+            }
             else
+            {
                 fourierMixingEnabled = false;
+            }
         }
 
         public void Flush()

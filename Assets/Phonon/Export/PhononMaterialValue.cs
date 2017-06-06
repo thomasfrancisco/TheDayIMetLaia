@@ -34,18 +34,26 @@ namespace Phonon
             HighFreqAbsorption = aHigh;
 
             Scattering = 0.05f;
+
+            LowFreqTransmission = .1f;
+            MidFreqTransmission = .05f;
+            HighFreqTransmission = .03f;
         }
 
         //
         // Constructor.
         //
-        public PhononMaterialValue(float aLow, float aMid, float aHigh, float scattering)
+        public PhononMaterialValue(float aLow, float aMid, float aHigh, float scattering, float tLow, float tMid, float tHigh)
         {
             LowFreqAbsorption = aLow;
             MidFreqAbsorption = aMid;
             HighFreqAbsorption = aHigh;
 
             Scattering = scattering;
+
+            LowFreqTransmission = tLow;
+            MidFreqTransmission = tMid;
+            HighFreqTransmission = tHigh;
         }
 
         //
@@ -66,6 +74,10 @@ namespace Phonon
             HighFreqAbsorption = other.HighFreqAbsorption;
 
             Scattering = other.Scattering;
+
+            LowFreqTransmission = other.LowFreqTransmission;
+            MidFreqTransmission = other.MidFreqTransmission;
+            HighFreqTransmission = other.HighFreqTransmission;
         }
 
         //
@@ -84,5 +96,12 @@ namespace Phonon
         [Range(0.0f, 1.0f)]
         public float Scattering;
 
+        // Scattering coefficients.
+        [Range(0.0f, 1.0f)]
+        public float LowFreqTransmission;
+        [Range(0.0f, 1.0f)]
+        public float MidFreqTransmission;
+        [Range(0.0f, 1.0f)]
+        public float HighFreqTransmission;
     }
 }

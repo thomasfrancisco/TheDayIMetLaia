@@ -27,6 +27,7 @@ public class Son_Niveau_1 : MonoBehaviour {
     public Transform intersectionSansAig;
     public Transform railEvent01;
     public Transform railDoorClosed;
+    public Transform iaVoice;
 
     public float delayBeforeUTurnReminder;
 
@@ -56,6 +57,7 @@ public class Son_Niveau_1 : MonoBehaviour {
     private RailScriptV2 intersectionSansAigScript;
     private RailScriptV2 railEvent01Script;
     private RailScriptV2 railDoorClosedScript;
+    private IAVoice1 iaVoiceScript;
 
     private Transform ugo;
     private RailMovementV2 ugoMovement;
@@ -88,6 +90,7 @@ public class Son_Niveau_1 : MonoBehaviour {
         intersectionSansAigScript = intersectionSansAig.GetComponent<RailScriptV2>();
         railEvent01Script = railEvent01.GetComponent<RailScriptV2>();
         railDoorClosedScript = railDoorClosed.GetComponent<RailScriptV2>();
+        iaVoiceScript = iaVoice.GetComponent<IAVoice1>();
 
         ugo = transform.Find("/Player");
         ugoMovement = ugo.GetComponent<RailMovementV2>();
@@ -100,62 +103,75 @@ public class Son_Niveau_1 : MonoBehaviour {
 	void Update () {
         if(Vector3.Distance(ugo.position, railTriggerClosingDoor.position) < 1f && ugo.position.z > railTriggerClosingDoor.position.z  && !sound1_1_1.isPlayed())
         {
-            previousSpeakers.gameObject.SetActive(false);
-            previousLevel.gameObject.SetActive(false);
-            previousSoundAmb.gameObject.SetActive(false);
-            nextSpeakers.gameObject.SetActive(true);
-            firstDoorScript.closeDoor();
-            nextRail.gameObject.SetActive(true);
-            previousRail.gameObject.SetActive(false);
-            playSound(sound1_1_1);
-            
+            if (!iaVoiceScript.isPlaying())
+            {
+                previousSpeakers.gameObject.SetActive(false);
+                previousLevel.gameObject.SetActive(false);
+                previousSoundAmb.gameObject.SetActive(false);
+                nextSpeakers.gameObject.SetActive(true);
+                firstDoorScript.closeDoor();
+                nextRail.gameObject.SetActive(true);
+                previousRail.gameObject.SetActive(false);
+                playSound(sound1_1_1);
 
-            railTriggerClosingDoorScript.southRail = null;
-            railTriggerClosingDoorScript.oneWay = false;
-            railTriggerClosingDoorScript.isBlocked = true;
-            railTriggerClosingDoorScript.connectRails();
-        } else if (sound1_1_1.isPlayed() && sound1_1_1.isFinished() && !sound1_2_1.isPlayed())
+
+                railTriggerClosingDoorScript.southRail = null;
+                railTriggerClosingDoorScript.oneWay = false;
+                railTriggerClosingDoorScript.isBlocked = true;
+                railTriggerClosingDoorScript.connectRails();
+            }
+        }
+        if (sound1_1_1.isPlayed() && sound1_1_1.isFinished() && !sound1_2_1.isPlayed())
         {
             playSound(sound1_2_1);
             
-        } else if (Vector3.Distance(ugo.position, railDouille.position) < 1f  && !sound1_2_2.isPlayed())
+        }
+        if (Vector3.Distance(ugo.position, railDouille.position) < 1f  && !sound1_2_2.isPlayed())
         {
             playSound(sound1_2_2);
             
-        } else if (ugoMovement.getIntersection() == railObstacleScript && !sound1_3_1.isPlayed())
+        }
+        if (ugoMovement.getIntersection() == railObstacleScript && !sound1_3_1.isPlayed())
         {
             playSound(sound1_3_1);
             
-        } else if (!sound1_3_2.isPlayed() && sound1_3_1.isFinished()) // && sfxAigActivation.isFinished)
+        }
+        if (!sound1_3_2.isPlayed() && sound1_3_1.isFinished()) // && sfxAigActivation.isFinished)
         {
             playSound(sound1_3_2);
             
             intersectionTutoDemiTourScript.oneWay = false;
             StartCoroutine(testUturn());
 
-        } else if(sound1_3_2.isPlayed() && !sound1_3_4.isPlayed() && Camera.main.transform.eulerAngles.y > 160f && Camera.main.transform.eulerAngles.y < 200f)
+        }
+        if (sound1_3_2.isPlayed() && !sound1_3_4.isPlayed() && Camera.main.transform.eulerAngles.y > 160f && Camera.main.transform.eulerAngles.y < 200f)
         {
             playSound(sound1_3_4);
             
             uTurnDone = true;
-        } else if (sound1_3_4.isPlayed() && !sound1_4_1.isPlayed() && ugoMovement.getIntersection() == intersectionTutoDemiTourScript)
+        }
+        if (sound1_3_4.isPlayed() && !sound1_4_1.isPlayed() && ugoMovement.getIntersection() == intersectionTutoDemiTourScript)
         {
             playSound(sound1_4_1);
             
-        } else if (sound1_4_1.isPlayed() && ugoMovement.getIntersection().aigPosition == RailScriptV2.AigPosition.aig1 && ugoMovement.getIntersection() == intersectionTutoDemiTourScript 
+        }
+        if (sound1_4_1.isPlayed() && ugoMovement.getIntersection().aigPosition == RailScriptV2.AigPosition.aig1 && ugoMovement.getIntersection() == intersectionTutoDemiTourScript 
             && ugoMovement.isMovingForward && !sound1_4_2.isPlayed())
         {
             playSound(sound1_4_2);
             
-        } else if (ugoMovement.getIntersection() == intersectionSansAigScript && !sound1_4_3.isPlayed())
+        }
+        if (ugoMovement.getIntersection() == intersectionSansAigScript && !sound1_4_3.isPlayed())
         {
             playSound(sound1_4_3);
             
-        } else if (ugoMovement.getIntersection() == railEvent01Script && !sound1_5.isPlayed())
+        }
+        if (ugoMovement.getIntersection() == railEvent01Script && !sound1_5.isPlayed())
         {
             playSound(sound1_5);
             
-        } else if (ugoMovement.getIntersection() == railDoorClosedScript && !sound1_6_1.isPlayed())
+        }
+        if (ugoMovement.getIntersection() == railDoorClosedScript && !sound1_6_1.isPlayed())
         {
             playSound(sound1_6_1);
             

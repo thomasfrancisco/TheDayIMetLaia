@@ -134,7 +134,7 @@ namespace Phonon
                         phononManager.PhononStaticListener(), phononManager.PhononListener());
                 }
 
-                yield return new WaitForEndOfFrame();
+                yield return waitForEndOfFrame;
             }
         }
 
@@ -145,29 +145,28 @@ namespace Phonon
         {
             mutex.WaitOne();
 
-            if (data == null)
+            if (data != null)
             {
-                mutex.ReleaseMutex();
-                return;
-            }
+                if (!initialized || destroying)
+                {
+                    Array.Clear(data, 0, data.Length);
+                }
+                else if (acceleratedMixing && processMixedAudio)
+                {
+                    indirectMixer.AudioFrameUpdate(data, channels, 
+                        phononContainer.EnvironmentalRenderer().GetEnvironmentalRenderer(), listenerPosition,
+                        listenerAhead, listenerUp, indirectBinauralEnabled);
+                }
+                else if (enableReverb)
+                {
+                    float[] wetData = indirectSimulator.AudioFrameUpdate(data, channels, listenerPosition,
+                        listenerPosition, listenerAhead, listenerUp, enableReverb, reverbMixFraction,
+                        indirectBinauralEnabled, phononManager.PhononListener());
 
-            if (!initialized || destroying || (acceleratedMixing && !processMixedAudio))
-            {
-                mutex.ReleaseMutex();
-                Array.Clear(data, 0, data.Length);
-                return;
-            }
-
-            if (acceleratedMixing)
-                indirectMixer.AudioFrameUpdate(data, channels, phononContainer.EnvironmentalRenderer().GetEnvironmentalRenderer(),
-                    listenerPosition, listenerAhead, listenerUp, indirectBinauralEnabled);
-            else if (enableReverb)
-            {
-                float[] wetData = indirectSimulator.AudioFrameUpdate(data, channels, listenerPosition, listenerPosition, 
-                    listenerAhead, listenerUp, enableReverb, reverbMixFraction, indirectBinauralEnabled, phononManager.PhononListener());
-                if (wetData != null && wetData.Length != 0)
-                    for (int i = 0; i < data.Length; ++i)
-                        data[i] = data[i] * dryMixFraction + wetData[i];
+                    if (wetData != null && wetData.Length != 0)
+                        for (int i = 0; i < data.Length; ++i)
+                            data[i] = data[i] * dryMixFraction + wetData[i];
+                }
             }
 
             mutex.ReleaseMutex();
@@ -277,5 +276,7 @@ namespace Phonon
         bool initialized = false;
         bool destroying = false;
         bool errorLogged = false;
+
+        WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
     }
 }

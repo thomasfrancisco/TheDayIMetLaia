@@ -39,11 +39,8 @@ public class Son_Niveau_2 : MonoBehaviour
     public AudioClip N2_8_5_1;
     public AudioClip N2_8_5_2;
 
-    public Transform previousSpeakers;
-    public Transform previousLevel;
+    public List<Transform> previousThing;
     public Transform previousDoor;
-    public Transform nextRail;
-    public Transform previousRail;
 
     public Transform triggerClosingDoor;
     public Transform railGlasses;
@@ -61,6 +58,9 @@ public class Son_Niveau_2 : MonoBehaviour
     public Transform triggerPuzzleRoom;
     public Transform railPuzzleSequence;
     public Transform puzzleSequence;
+    public Transform nextRailElevator;
+    public List<Transform> thingToActivate;
+    
 
     public float timeBeforeAudiologReminder;
 
@@ -188,10 +188,14 @@ public class Son_Niveau_2 : MonoBehaviour
             playSound(sound2_0_1);
 
             previousDoorScript.closeDoor();
-            previousRail.gameObject.SetActive(false);
-            //nextRail.gameObject.SetActive(true);
-            previousLevel.gameObject.SetActive(false);
-            previousSpeakers.gameObject.SetActive(false);
+            foreach(Transform thing in previousThing)
+            {
+                thing.gameObject.SetActive(false);
+            }
+            foreach(Transform thing in thingToActivate)
+            {
+                thing.gameObject.SetActive(true);
+            }
             triggerClosingDoorScript.southRail = null;
             triggerClosingDoorScript.oneWay = false;
             triggerClosingDoorScript.isBlocked = true;
@@ -326,8 +330,8 @@ public class Son_Niveau_2 : MonoBehaviour
 
             }
             if (puzzleSequenceScript.unlocked && !sound2_7_2_2.isPlayed())
-            {
-                playSound(sound2_7_2_2);
+            {                
+                StartCoroutine(endOfLevel());
 
             }
         }
@@ -410,6 +414,18 @@ public class Son_Niveau_2 : MonoBehaviour
         yield return new WaitForSeconds(timeBeforeAudiologReminder);
         if (!audiologGlassHouse3Script.audioLog_Played)
             playSound(sound2_3_2);
+    }
+
+    private IEnumerator endOfLevel()
+    {
+        //Des bruits d'ascenceurs
+        railElevatorScript.westRail = null;
+        railElevatorScript.connectRails();
+        playSound(sound2_7_2_2);
+        yield return new WaitForSeconds(N2_7_2_2.length);
+        railElevatorScript.eastRail = nextRailElevator;
+        railElevatorScript.connectRails();
+
     }
 
 

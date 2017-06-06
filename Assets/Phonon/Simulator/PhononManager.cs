@@ -311,28 +311,13 @@ namespace Phonon
         }
 
         // Exports Unity Scene and saves it in a phononscene file.
-        public void ExportScene()
+        public void ExportScene(bool exportOBJ)
         {
             Scene exportScene = new Scene();
             ComputeDevice exportComputeDevice = new ComputeDevice();
             try
             {
-                exportScene.Export(exportComputeDevice, SimulationSettings(), materialValue, GlobalContext());
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("Phonon Geometry not attached. " + e.Message);
-            }
-        }
-
-        // Exports Unity Scene and saves it in an OBJ file.
-        public void DumpScene()
-        {
-            Scene exportScene = new Scene();
-            ComputeDevice exportComputeDevice = new ComputeDevice();
-            try
-            {
-                exportScene.DumpToObj(exportComputeDevice, SimulationSettings(), materialValue, GlobalContext());
+                exportScene.Export(exportComputeDevice, SimulationSettings(), materialValue, GlobalContext(), exportOBJ);
             }
             catch (Exception e)
             {

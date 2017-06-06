@@ -37,6 +37,13 @@ public class SoundTemplate {
         _isPlayed = true;
     }
     
+    public void setLoop(bool value)
+    {
+        foreach(AudioSource source in _sources)
+        {
+            source.loop = true;
+        }
+    }
 
     public bool isPlayed()
     {

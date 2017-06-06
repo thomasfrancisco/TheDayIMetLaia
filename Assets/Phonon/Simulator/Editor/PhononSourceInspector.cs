@@ -34,13 +34,18 @@ namespace Phonon
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("hrtfInterpolation"), new GUIContent("HRTF Interpolation"));
             }
 
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("directOcclusionOption"));
-            if (serializedObject.FindProperty("directOcclusionOption").enumValueIndex == (int) OcclusionOption.Partial)
+            serializedObject.FindProperty("directOcclusionMode").enumValueIndex = EditorGUILayout.Popup("Direct Sound Occlusion", serializedObject.FindProperty("directOcclusionMode").enumValueIndex, optionsOcclusion);
+            if (serializedObject.FindProperty("directOcclusionMode").enumValueIndex != (int) OcclusionMode.NoOcclusion)
             {
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("partialOcclusionRadius"), new GUIContent("Source Radius (meters)"));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("directOcclusionMethod"));
+                if (serializedObject.FindProperty("directOcclusionMethod").enumValueIndex == (int)OcclusionMethod.Partial)
+                {
+                    EditorGUILayout.PropertyField(serializedObject.FindProperty("partialOcclusionRadius"), new GUIContent("Source Radius (meters)"));
+                }
             }
 
             EditorGUILayout.PropertyField(serializedObject.FindProperty("physicsBasedAttenuation"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("airAbsorption"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("directMixFraction"));
 
             // Indirect Sound UX
@@ -61,7 +66,7 @@ namespace Phonon
                 if (phononEffect.sourceSimulationType == SourceSimulationType.BakedStaticSource)
                 {
                     BakedSourceGUI();
-                    bakedStatsFoldout = EditorGUILayout.Foldout(bakedStatsFoldout, "Baked Static Source Statistics", true);
+                    bakedStatsFoldout = EditorGUILayout.Foldout(bakedStatsFoldout, "Baked Static Source Statistics");
                     if (bakedStatsFoldout)
                         BakedSourceStatsGUI();
                 }
@@ -133,5 +138,6 @@ namespace Phonon
         }
 
         bool bakedStatsFoldout = false;
+        string[] optionsOcclusion = new string[] { "Off", "On, No Transmission", "On, Frequency Independent Transmission", "On, Frequency Dependent Transmission" };
     }
 }
