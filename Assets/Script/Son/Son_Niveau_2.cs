@@ -40,6 +40,7 @@ public class Son_Niveau_2 : MonoBehaviour
     public AudioClip N2_8_5_2;
 
     public List<Transform> previousThing;
+    public List<Transform> nextThing;
     public Transform previousDoor;
 
     public Transform triggerClosingDoor;
@@ -59,7 +60,10 @@ public class Son_Niveau_2 : MonoBehaviour
     public Transform railPuzzleSequence;
     public Transform puzzleSequence;
     public Transform nextRailElevator;
-    public List<Transform> thingToActivate;
+    public Transform sfxBestiole1;
+    public Transform sfxBestiole2;
+    public Transform elevator;
+    public Transform iaVoice;
     
 
     public float timeBeforeAudiologReminder;
@@ -112,6 +116,11 @@ public class Son_Niveau_2 : MonoBehaviour
     private SwitchBehavior switchElevatorScript;
     private Puzzle2Script puzzleSequenceScript;
     private RailScriptV2 railPuzzleSequenceScript;
+    private RailScriptV2 nextRailElevatorScript;
+    private sfxSound sfxBestiole1Script;
+    private sfxSound sfxBestiole2Script;
+    private ElevatorSound elevatorScript;
+    private IAVoice2 iaVoiceScript;
 
     private Transform ugo;
     private RailMovementV2 ugoMovement;
@@ -172,7 +181,11 @@ public class Son_Niveau_2 : MonoBehaviour
         switchElevatorScript = switchElevator.GetComponent<SwitchBehavior>();
         puzzleSequenceScript = puzzleSequence.GetComponent<Puzzle2Script>();
         railPuzzleSequenceScript = railPuzzleSequence.GetComponent<RailScriptV2>();
-
+        nextRailElevatorScript = nextRailElevator.GetComponent<RailScriptV2>();
+        sfxBestiole1Script = sfxBestiole1.GetComponent<sfxSound>();
+        sfxBestiole2Script = sfxBestiole2.GetComponent<sfxSound>();
+        elevatorScript = elevator.GetComponent<ElevatorSound>();
+        iaVoiceScript = iaVoice.GetComponent<IAVoice2>();
 
         ugo = transform.Find("/Player");
         ugoMovement = ugo.GetComponent<RailMovementV2>();
@@ -183,23 +196,23 @@ public class Son_Niveau_2 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Vector3.Distance(ugo.position, triggerClosingDoor.position) < 1f && ugo.position.z > triggerClosingDoor.position.z && !sound2_0_1.isPlayed())
+        if (ugo.position.z > triggerClosingDoor.position.z && !sound2_0_1.isPlayed())
         {
-            playSound(sound2_0_1);
+            if (!iaVoiceScript.isPlaying())
+            {
+                playSound(sound2_0_1);
 
-            previousDoorScript.closeDoor();
-            foreach(Transform thing in previousThing)
-            {
-                thing.gameObject.SetActive(false);
+
+                foreach (Transform thing in previousThing)
+                {
+                    thing.gameObject.SetActive(false);
+                }
+                previousDoorScript.closeDoor();
+                triggerClosingDoorScript.southRail = null;
+                triggerClosingDoorScript.oneWay = false;
+                triggerClosingDoorScript.isBlocked = true;
+                triggerClosingDoorScript.connectRails();
             }
-            foreach(Transform thing in thingToActivate)
-            {
-                thing.gameObject.SetActive(true);
-            }
-            triggerClosingDoorScript.southRail = null;
-            triggerClosingDoorScript.oneWay = false;
-            triggerClosingDoorScript.isBlocked = true;
-            triggerClosingDoorScript.connectRails();
         }
         if (Vector3.Distance(ugo.position, railGlasses.position) < 1f && ugo.position.x < railGlasses.position.x
                    && !sound2_1_1.isPlayed())
@@ -249,15 +262,7 @@ public class Son_Niveau_2 : MonoBehaviour
         if (ugoMovement.getIntersection() == railCorpseScript && !sound2_4_1.isPlayed())
         {
             playSound(sound2_4_1);
-
-        }
-        if (sound2_4_1.isFinished() && Input.GetAxis("Vertical") != 0 && !sound2_4_2.isPlayed())
-        {
-            playSound(sound2_4_2);
-            railObstacleExitScript.northRail = relatedRailObstacle;
-            railObstacleExitScript.isBlocked = false;
-            railObstacleExitScript.oneWay = true;
-            railObstacleExitScript.connectRails();
+            StartCoroutine(playBestioles());
 
         }
         if (Vector3.Distance(ugo.position, audiolog1GlassHouse5.position) < audiolog1GlassHouse5Script.trigger_dist
@@ -418,15 +423,42 @@ public class Son_Niveau_2 : MonoBehaviour
 
     private IEnumerator endOfLevel()
     {
-        //Des bruits d'ascenceurs
+        elevatorScript.playElevator();
         railElevatorScript.westRail = null;
         railElevatorScript.connectRails();
         playSound(sound2_7_2_2);
-        yield return new WaitForSeconds(N2_7_2_2.length);
+        yield return new WaitForSeconds(N2_7_2_2.length + 2f);
+        elevatorScript.stopElevator();
+
+        foreach (Transform thing in nextThing)
+        {
+            thing.gameObject.SetActive(true);
+        }
         railElevatorScript.eastRail = nextRailElevator;
+        nextRailElevatorScript.westRail = railElevator;
         railElevatorScript.connectRails();
+        nextRailElevatorScript.connectRails();
 
     }
 
+    private IEnumerator playBestioles()
+    {
+        yield return new WaitForSeconds(N2_4_1.length);
+        sfxBestiole1Script.play();
+        yield return new WaitForSeconds(sfxBestiole1Script.clip.length);
+        sfxBestiole2Script.play();
+        yield return new WaitForSeconds(sfxBestiole2Script.clip.length - 2f);
+        playSound(sound2_4_2);
+
+        railObstacleExitScript.northRail = relatedRailObstacle;
+        railObstacleExitScript.isBlocked = false;
+        railObstacleExitScript.oneWay = true;
+        railObstacleExitScript.connectRails();
+
+    }
+
+    private void manageLevel()
+    {
+    }
 
 }

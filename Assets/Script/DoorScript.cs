@@ -26,6 +26,7 @@ public class DoorScript : MonoBehaviour {
     public AudioClip electricLoop;
     public AudioClip signalFail;
     public AudioClip signalWin;
+    public AudioClip panel_fall;
 
     private AudioSource sourceDoor;
     private AudioSource sourceSignal;
@@ -96,6 +97,8 @@ public class DoorScript : MonoBehaviour {
                 {
                     isHatchOpen = true;
                     ugoMovement.doAction = false;
+                    sourceDoor.clip = panel_fall;
+                    sourceDoor.Play();
                 }
             }
         }

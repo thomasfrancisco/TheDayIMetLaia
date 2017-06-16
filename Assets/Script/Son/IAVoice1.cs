@@ -10,19 +10,20 @@ public class IAVoice1 : MonoBehaviour {
 
     private SoundTemplate sound1_1;
     private Transform ugo;
-    
-    
+
+    private TriggerIA triggerCrewQuarter;
 
     private void Awake()
     {
         source = GetComponent<AudioSource>();
         sound1_1 = new SoundTemplate(ia_n1_1, source);
+        triggerCrewQuarter = trigCrewQuarter.GetComponent<TriggerIA>();
         ugo = transform.Find("/Player");
     }
 
 	// Update is called once per frame
 	void Update () {
-		if(Vector3.Distance(ugo.position, trigCrewQuarter.position) < 1f && !sound1_1.isPlayed())
+		if(Vector3.Distance(ugo.position, trigCrewQuarter.position) < triggerCrewQuarter.distanceArea && !sound1_1.isPlayed())
         {
             playSound(sound1_1);
         }

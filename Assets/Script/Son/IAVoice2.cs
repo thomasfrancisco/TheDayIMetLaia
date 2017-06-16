@@ -46,7 +46,7 @@ public class IAVoice2 : MonoBehaviour {
     void Update () {
 		if(Vector3.Distance(ugo.position, trigGreenhouse.position) < triggerGreenhouse.distanceArea)
         {
-            if (sound2_1.isPlayed())
+            if (!sound2_1.isPlayed())
             {
                 playSound(sound2_1);
             }
@@ -57,7 +57,7 @@ public class IAVoice2 : MonoBehaviour {
 
         if(Vector3.Distance(ugo.position, trigControlCenter.position) < triggerControlCenter.distanceArea)
         {
-            if (sound2_2.isPlayed())
+            if (!sound2_2.isPlayed())
             {
                 playSound(sound2_2);
             }
@@ -76,6 +76,7 @@ public class IAVoice2 : MonoBehaviour {
 
     public bool isPlaying()
     {
+
         foreach(AudioSource source in sourcesGreenhouse)
         {
             if (source.isPlaying)

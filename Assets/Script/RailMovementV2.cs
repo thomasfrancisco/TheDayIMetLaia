@@ -85,6 +85,7 @@ public class RailMovementV2 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
         if (Input.GetButtonDown("Fire1") || Input.inputString == "\n")
             doAction = true;
         if (isOnIntersection)
@@ -399,7 +400,14 @@ public class RailMovementV2 : MonoBehaviour
         {
             isMovingBlocked = true;
             intersection.isCollided = true;
-            sonCollision.playCollision();
+            if (intersection.isACorpse)
+            {
+                sonCollision.playCorpse();
+            }
+            else
+            {
+                sonCollision.playCollision();
+            }
         }
         else
         {

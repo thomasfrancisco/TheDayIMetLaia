@@ -6,8 +6,6 @@ public class SimpleDoor : MonoBehaviour {
 
     public AudioClip openingClip;
     public AudioClip closingClip;
-    public AudioClip playerNearUnlockClip;
-    public AudioClip playerNearLockClip;
 
     private bool isOpen;
     public bool isLocked;
@@ -16,9 +14,7 @@ public class SimpleDoor : MonoBehaviour {
 
     private Transform ugo;
     private AudioSource source;
-
-    private SoundTemplate soundNearUnlock;
-    private SoundTemplate soundNearLock;
+    
     private SoundTemplate soundOpening;
     private SoundTemplate soundClosing;
 
@@ -34,8 +30,6 @@ public class SimpleDoor : MonoBehaviour {
     {
         ugo = transform.Find("/Player");
         source = GetComponent<AudioSource>();
-        soundNearUnlock = new SoundTemplate(playerNearUnlockClip, source);
-        soundNearLock = new SoundTemplate(playerNearLockClip, source);
         soundOpening = new SoundTemplate(openingClip, source);
         soundClosing = new SoundTemplate(closingClip, source);
         mesh = transform.GetChild(0);
@@ -44,51 +38,35 @@ public class SimpleDoor : MonoBehaviour {
 
     private void Update()
     {
-        if(Vector3.Distance(ugo.position, transform.position) < areaActivation)
+        if (Vector3.Distance(ugo.position, transform.position) < areaActivation)
         {
-            if (isLocked)
+            if (!soundOpening.isPlayed())
             {
-                if (!soundNearLock.isPlayed())
-                {
-                    soundNearLock.play();
-                }
-            } else
-            {
-
-                if (!soundNearLock.isPlayed())
-                {
-                    isOpen = true;
-                    mesh.gameObject.SetActive(false);
-                    StartCoroutine(openDoorSound());
-                }
+                playSound(soundOpening);
+                soundClosing.setIsPlayed(false);
             }
         } else
         {
-            if (soundNearLock.isPlayed())
+            if (!soundClosing.isPlayed())
             {
-                soundNearLock.setIsPlayed(false);
-            }
-
-            if (soundNearUnlock.isPlayed())
-            {
-                soundNearUnlock.setIsPlayed(false);
-            }
-
-            if (isOpen)
-            {
-                isOpen = false;
-                mesh.gameObject.SetActive(true);
-                soundClosing.play();
+                playSound(soundClosing);
+                soundOpening.setIsPlayed(false);
             }
         }
     }
 
-    private IEnumerator openDoorSound()
+
+    public void closeDoor()
     {
-        soundNearUnlock.play();
-        yield return new WaitForSeconds(playerNearUnlockClip.length);
-        soundOpening.play();
+        isOpen = false;
+        mesh.gameObject.SetActive(true);
+        soundClosing.play();
     }
 
+    private void playSound(SoundTemplate sound)
+    {
+        sound.play();
+        StartCoroutine(sound.endOfClip(0f));
+    }
 
 }

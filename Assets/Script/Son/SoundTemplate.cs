@@ -8,6 +8,7 @@ public class SoundTemplate {
     private List<AudioSource> _sources; //S'il y en a plusieurs
     public delegate void AudioCallback();
     private bool _finished;
+    private float _volumeMax;
 
     public SoundTemplate(AudioClip clip, AudioSource source)
     {
@@ -16,6 +17,7 @@ public class SoundTemplate {
         _sources.Add(source);
         _isPlayed = false;
         _finished = false;
+        _volumeMax = _sources[0].volume;
     }
 
     public SoundTemplate(AudioClip clip, List<AudioSource> sources)
@@ -24,6 +26,7 @@ public class SoundTemplate {
         _sources = sources;
         _isPlayed = false;
         _finished = false;
+        _volumeMax = _sources[0].volume;
     }
 
     public void play()
@@ -76,6 +79,36 @@ public class SoundTemplate {
     {
         yield return new WaitForSeconds(time);
         callback();
+    }
+
+    public IEnumerator fadeIn(float time)
+    {
+        foreach(AudioSource source in _sources)
+        {
+            source.volume = 0f;
+        }
+        play();
+        for(int i = 0; i < 100; i++)
+        {
+            foreach (AudioSource source in _sources)
+            {
+                source.volume += _volumeMax / 100f;
+            }
+            yield return new WaitForSeconds(time / 100f);
+        }
+    }
+
+    public IEnumerator fadeOut(float time)
+    {
+        for(int i = 0; i < 100; i++)
+        {
+            foreach(AudioSource source in _sources)
+            {
+                source.volume -= _volumeMax / 100f;
+            }
+            yield return new WaitForSeconds(time / 100f);
+        }
+        
     }
     
 

@@ -31,10 +31,11 @@ public class IAVoice3 : MonoBehaviour {
     public Transform sourceEntryControlRoom;
     public Transform sourceEntryMaintenance;
     public Transform sourceExit;
+    public Transform sfxBridge;
 
     private SoundTemplate sound31_1;
     private SoundTemplate sound31_2;
-    private SoundTemplate sound31_3;
+    //private SoundTemplate sound31_3; <-- Tourne en boucle, donc sfx
     private SoundTemplate sound31_4;
     private SoundTemplate sound31_5_1;
     private SoundTemplate sound31_5_2;
@@ -43,6 +44,7 @@ public class IAVoice3 : MonoBehaviour {
     private SoundTemplate sound31_7;
     private SoundTemplate sound31_8;
 
+    private TriggerIA triggerEngineRoom;
     private TriggerIA triggerBridge;
     private Puzzle2Script puzzleSequence1Script;
     private Puzzle2Script puzzleSequence2Script;
@@ -58,12 +60,14 @@ public class IAVoice3 : MonoBehaviour {
     private AudioSource sEntryControlRoom;
     private AudioSource sEntryMaintenance;
     private AudioSource sExit;
+    private sfxSound sfxBridgeScript;
 
     private Transform ugo;
 
     private void Awake()
     {
-        ugo = transform.Find("Player");
+        ugo = transform.Find("/Player");
+        triggerEngineRoom = trigEngineRoom.GetComponent<TriggerIA>();
         triggerBridge = trigBrigde.GetComponent<TriggerIA>();
         puzzleSequence1Script = puzzleSequence1.GetComponent<Puzzle2Script>();
         puzzleSequence2Script = puzzleSequence2.GetComponent<Puzzle2Script>();
@@ -88,27 +92,29 @@ public class IAVoice3 : MonoBehaviour {
         sound31_6 = new SoundTemplate(n31_6, sEntryControlRoom);
         sound31_7 = new SoundTemplate(n31_7, sEntryMaintenance);
         sound31_8 = new SoundTemplate(n31_8, sExit);
+        sfxBridgeScript = sfxBridge.GetComponent<sfxSound>();
 
     }
 
     // Update is called once per frame
     void Update () {
-        if (Vector3.Distance(ugo.position, trigEngineRoom.position) < 1f && !sound31_1.isPlayed())
+        if (Vector3.Distance(ugo.position, trigEngineRoom.position) < triggerEngineRoom.distanceArea && !sound31_1.isPlayed())
         {
             playSound(sound31_1);
         }
 
         if(Vector3.Distance(ugo.position, trigBrigde.position) < triggerBridge.distanceArea)
         {
-            if (!sound31_5_1.isPlayed())
-            {
-                playSound(sound31_5_1);
-            } else if (!sound31_5_3.isPlayed() && puzzleSequence1Script.unlocked && puzzleSequence2Script.unlocked)
+            if(!sound31_5_3.isPlayed() && !sound31_5_2.isPlayed() && !sound31_5_1.isPlayed() && puzzleSequence1Script.unlocked && puzzleSequence2Script.unlocked)
             {
                 playSound(sound31_5_3);
-            } else if (!sound31_5_2.isPlayed() && (puzzleSequence1Script.unlocked || puzzleSequence2Script.unlocked))
+                sfxBridgeScript.play();
+            } else if(!sound31_5_2.isPlayed() && !sound31_5_1.isPlayed() && !sound31_5_3.isPlayed() &&  (puzzleSequence1Script.unlocked || puzzleSequence2Script.unlocked))
             {
                 playSound(sound31_5_2);
+            } else if (!sound31_5_1.isPlayed() && !sound31_5_2.isPlayed() && !sound31_5_3.isPlayed() && !puzzleSequence2Script.unlocked && !puzzleSequence1Script.unlocked)
+            {
+                playSound(sound31_5_1);
             }
         } else
         {
@@ -131,13 +137,13 @@ public class IAVoice3 : MonoBehaviour {
         if(Vector3.Distance(ugo.position, trigControlRoom.position) < triggerControlRoom.distanceArea)
         {
 
-            if (!sound31_7.isPlayed())
+            if (!sound31_6.isPlayed())
             {
-                playSound(sound31_7);
+                playSound(sound31_6);
             }
         } else
         {
-            sound31_7.setIsPlayed(false);
+            sound31_6.setIsPlayed(false);
            
         }
 
@@ -176,12 +182,6 @@ public class IAVoice3 : MonoBehaviour {
             sound31_4.setIsPlayed(false);
         }
 
-
-
-
-
-
-
 	}
 
     private float getAngleWithObject(Transform target)
@@ -195,5 +195,9 @@ public class IAVoice3 : MonoBehaviour {
         StartCoroutine(sound.endOfClip(0f));
     }
 
+    public bool isPlaying()
+    {
+        return sEntry.isPlaying || sExit.isPlaying ||  sBridge.isPlaying;
+    }
 
 }

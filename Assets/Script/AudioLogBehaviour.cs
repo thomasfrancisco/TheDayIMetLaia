@@ -25,11 +25,14 @@ public class AudioLogBehaviour : MonoBehaviour
     private bool isPlaying;
     private float timer;
     private bool isSequence;
+    private float volumeInspector;
 
     private void Awake()
     {
         isFinished = false;
+        
         source = GetComponent<AudioSource>();
+        volumeInspector = source.volume;
         source.playOnAwake = false;
         source.loop = false;
         ugo = transform.Find("/Player");
@@ -72,6 +75,7 @@ public class AudioLogBehaviour : MonoBehaviour
                         source.clip = soundNear;
                     else
                         source.clip = soundAlreadyPlayed;
+                    source.volume = volumeInspector;
                     source.Play();
                     timer = 0f;
 
@@ -81,7 +85,9 @@ public class AudioLogBehaviour : MonoBehaviour
                     if (getAngleWithObject(transform) < trigger_angle)
                     {
                         movementScript.doAction = false;
+                        audioLog_Played = true;
                         source.clip = soundActivation;
+                        source.volume = volumeInspector;
                         source.Play();
                         if (isSequence)
                         {
@@ -100,6 +106,7 @@ public class AudioLogBehaviour : MonoBehaviour
                 if (timer > frequency)
                 {
                     source.clip = soundFar;
+                    source.volume = volumeInspector;
                     source.Play();
                     timer = 0f;
                 }
@@ -118,6 +125,7 @@ public class AudioLogBehaviour : MonoBehaviour
         isFinished = false;
         isPlaying = true;
         yield return new WaitForSeconds(time);
+        source.volume = 1f;
         source.clip = audioLog_Content;
         source.Play();
         StartCoroutine(currentlyPlaying(audioLog_Content.length));

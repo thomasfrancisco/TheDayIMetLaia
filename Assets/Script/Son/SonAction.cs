@@ -20,7 +20,7 @@ public class SonAction : MonoBehaviour {
     // Use this for initialization
     void Start () {
         source.clip = activation;
-        //source.Play();
+        source.Play();
         
 	}
 	

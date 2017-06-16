@@ -26,10 +26,12 @@ public class LevelSelector : MonoBehaviour {
     public Transform railEpilogue;
 
     private RailMovementV2 ugoMovement;
+    private Transform ugo;
 
     private void Awake()
     {
-        ugoMovement = transform.Find("/Player").GetComponent<RailMovementV2>();
+        ugo = transform.Find("/Player");
+        ugoMovement = ugo.GetComponent<RailMovementV2>();
     }
 
     // Use this for initialization
@@ -43,6 +45,7 @@ public class LevelSelector : MonoBehaviour {
                 setActive(engineTransform, false);
                 setActive(epilogueTransform, false);
                 ugoMovement.firstRail = railBeginning;
+                
                 break;
             case level.CrewQuarter:
                 setActive(beginningTransform, false);
@@ -51,14 +54,18 @@ public class LevelSelector : MonoBehaviour {
                 setActive(engineTransform, false);
                 setActive(epilogueTransform, false);
                 ugoMovement.firstRail = railCrewQuarter;
+                ugoMovement.avanceDebloque = true;
+                ugoMovement.reculeDebloque = true;
                 break;
             case level.Greenhouse:
                 setActive(beginningTransform, false);
                 setActive(crewQuarterTransform, false);
                 setActive(greenHouseTransform, true);
-                setActive(engineTransform, true);
+                setActive(engineTransform, false);
                 setActive(epilogueTransform, false);
                 ugoMovement.firstRail = railGreenhouse;
+                ugoMovement.avanceDebloque = true;
+                ugoMovement.reculeDebloque = true;
                 break;
             case level.Engine:
                 setActive(beginningTransform, false);
@@ -67,13 +74,19 @@ public class LevelSelector : MonoBehaviour {
                 setActive(engineTransform, true);
                 setActive(epilogueTransform, true);
                 ugoMovement.firstRail = railEngine;
+                ugoMovement.avanceDebloque = true;
+                ugoMovement.reculeDebloque = true;
+
+
                 break;
             case level.Epilogue:
                 setActive(beginningTransform, false);
                 setActive(crewQuarterTransform, false);
                 setActive(greenHouseTransform, false);
-                setActive(engineTransform, false);
+                setActive(engineTransform, true);
                 setActive(epilogueTransform, true);
+                ugoMovement.avanceDebloque = true;
+                ugoMovement.reculeDebloque = true;
                 ugoMovement.firstRail = railEpilogue;
                 break;
         }

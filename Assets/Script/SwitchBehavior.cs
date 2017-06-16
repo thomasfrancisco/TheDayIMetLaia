@@ -7,18 +7,21 @@ public class SwitchBehavior : MonoBehaviour
 
     public float minDistTrigger;
     public float minAngle;
+    public float delayRepeatSignal;
 
     public Transform linkPuzzle;
     public AudioClip PUZ2_DoneSwitch_Hover;
     public AudioClip PUZ2_Push;
     public AudioClip PUZ2_Win;
     public AudioClip PUZ2_Fail;
+    public AudioClip signal;
 
     private Transform ugo;
     private Puzzle2Script script;
     private RailMovementV2 scriptMovement;
     private AudioSource source;
     private bool isHover;
+    private float timer;
 
     private void Awake()
     {
@@ -28,6 +31,7 @@ public class SwitchBehavior : MonoBehaviour
         source = GetComponent<AudioSource>();
         scriptMovement = ugo.GetComponent<RailMovementV2>();
         isHover = false;
+        timer = 0f;
     }
     // Use this for initialization
     void Start()
@@ -44,15 +48,21 @@ public class SwitchBehavior : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        timer += Time.deltaTime;
         if (Vector3.Distance(ugo.position, transform.position) < minDistTrigger)
         {
             if (getAngleWithObject(transform) < minAngle)
             {
+
+                source.loop = true;
                 if (!isHover)
                 {
-                    source.clip = PUZ2_DoneSwitch_Hover;
-                    source.Play();
-                    isHover = true;
+                    if (!source.isPlaying)
+                    {
+                        source.clip = PUZ2_DoneSwitch_Hover;
+                        source.Play();
+                        isHover = true;
+                    }
                 }
                 if (Input.GetButtonDown("Fire1") || Input.inputString == "\n")
                 {
@@ -65,8 +75,13 @@ public class SwitchBehavior : MonoBehaviour
             else
             {
                 isHover = false;
-                if (source.isPlaying)
-                    source.Stop();
+                source.loop = false;
+                if (timer > delayRepeatSignal)
+                {
+                    source.clip = signal;
+                    source.Play();
+                    timer = 0f;
+                }
             }
         } else
         {

@@ -15,10 +15,7 @@ public class Son_Niveau_1 : MonoBehaviour {
     public AudioClip N1_4_3;
     public AudioClip N1_5;
     public AudioClip N1_6_1;
-
-    public Transform previousSpeakers;
-    public Transform previousSoundAmb;
-    public Transform previousLevel;
+    
     public Transform firstDoor;
     public Transform railTriggerClosingDoor;
     public Transform railDouille;
@@ -31,9 +28,8 @@ public class Son_Niveau_1 : MonoBehaviour {
 
     public float delayBeforeUTurnReminder;
 
-    public Transform nextSpeakers;
-    public Transform nextRail;
-    public Transform previousRail;
+    public List<Transform> previousThings;
+    public List<Transform> nextThings;
 
     private List<AudioSource> sources;
     private SoundTemplate sound1_1_1;
@@ -101,17 +97,12 @@ public class Son_Niveau_1 : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-        if(Vector3.Distance(ugo.position, railTriggerClosingDoor.position) < 1f && ugo.position.z > railTriggerClosingDoor.position.z  && !sound1_1_1.isPlayed())
+        if(Vector3.Distance(ugo.position, railTriggerClosingDoor.position) < 10f && ugo.position.z > railTriggerClosingDoor.position.z  && !sound1_1_1.isPlayed())
         {
             if (!iaVoiceScript.isPlaying())
             {
-                previousSpeakers.gameObject.SetActive(false);
-                previousLevel.gameObject.SetActive(false);
-                previousSoundAmb.gameObject.SetActive(false);
-                nextSpeakers.gameObject.SetActive(true);
                 firstDoorScript.closeDoor();
-                nextRail.gameObject.SetActive(true);
-                previousRail.gameObject.SetActive(false);
+                manageLevel();
                 playSound(sound1_1_1);
 
 
@@ -156,7 +147,7 @@ public class Son_Niveau_1 : MonoBehaviour {
             
         }
         if (sound1_4_1.isPlayed() && ugoMovement.getIntersection().aigPosition == RailScriptV2.AigPosition.aig1 && ugoMovement.getIntersection() == intersectionTutoDemiTourScript 
-            && ugoMovement.isMovingForward && !sound1_4_2.isPlayed())
+            && ugo.position.z + 1 < intersectionTutoDemitour.position.z && !sound1_4_2.isPlayed())
         {
             playSound(sound1_4_2);
             
@@ -194,11 +185,24 @@ public class Son_Niveau_1 : MonoBehaviour {
 
     private IEnumerator testUturn()
     {
-        yield return new WaitForSeconds(delayBeforeUTurnReminder);
+        yield return new WaitForSeconds(N1_3_1.length + delayBeforeUTurnReminder);
         if (!uTurnDone)
         {
             playSound(sound1_3_3);
             
+        }
+    }
+
+    private void manageLevel()
+    {
+
+        foreach (Transform thing in previousThings)
+        {
+            thing.gameObject.SetActive(false);
+        }
+        foreach (Transform thing in nextThings)
+        {
+            thing.gameObject.SetActive(true);
         }
     }
 }

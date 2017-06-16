@@ -5,16 +5,15 @@ using UnityEngine;
 public class SonChoc : MonoBehaviour {
 
     public AudioClip collisionSound;
+    public AudioClip corpseSound;
 
     private AudioSource source;
     public float frequencyHit;
-    private float timer;
     private bool hasPlayed;
 
 
     private void Awake()
     {
-        timer = 0f;
         source = GetComponent<AudioSource>();
         source.playOnAwake = false;
         source.loop = false;
@@ -29,6 +28,16 @@ public class SonChoc : MonoBehaviour {
 	void Update () {
 		
 	}
+
+    public void playCorpse()
+    {
+        if(!source.isPlaying && !hasPlayed)
+        {
+            source.clip = corpseSound;
+            source.Play();
+            hasPlayed = true;
+        }
+    }
 
     public void playCollision()
     {
