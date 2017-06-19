@@ -320,10 +320,13 @@ public class RailMovementV2 : MonoBehaviour
     //Retourne l'angle entre le vecteur de la camera et l'objet
     private float getAngleWithObject(Transform target, bool isBack = false)
     {
+        Vector3 targetCameraVec = target.position - Camera.main.transform.position;
+        Vector2 targetCamVec2 = new Vector2(targetCameraVec.x, targetCameraVec.z);
+        Vector2 forward = new Vector2(Camera.main.transform.forward.x, Camera.main.transform.forward.z);
         if (!isBack)
-            return Vector3.Angle(target.position - Camera.main.transform.position, Camera.main.transform.forward);
+            return Vector2.Angle(targetCamVec2, forward);
         else
-            return Vector3.Angle(target.position - Camera.main.transform.position, Camera.main.transform.forward * -1);
+            return Vector2.Angle(targetCamVec2, forward * -1);
     }
 
     //Met a jour les variables de déplacements (Pour le son)
@@ -358,7 +361,9 @@ public class RailMovementV2 : MonoBehaviour
     {
         float verticalAxis = Input.GetAxis("Vertical");
         float angleNextElement = getAngleWithObject(previous.transform);
+        Debug.Log("Angle next element : " + angleNextElement);
         float angleSecondElement = getAngleWithObject(next.transform);
+        Debug.Log("Angle second element : " + angleSecondElement);
 
         if (angleSecondElement < angleMaxDirection)
         {

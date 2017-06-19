@@ -83,7 +83,6 @@ public class Son_Niveau_1 : MonoBehaviour {
         railDouilleScript = railDouille.GetComponent<RailScriptV2>();
         railObstacleScript = railObstacle.GetComponent<RailScriptV2>();
         intersectionTutoDemiTourScript = intersectionTutoDemitour.GetComponent<RailScriptV2>();
-        intersectionSansAigScript = intersectionSansAig.GetComponent<RailScriptV2>();
         railEvent01Script = railEvent01.GetComponent<RailScriptV2>();
         railDoorClosedScript = railDoorClosed.GetComponent<RailScriptV2>();
         iaVoiceScript = iaVoice.GetComponent<IAVoice1>();

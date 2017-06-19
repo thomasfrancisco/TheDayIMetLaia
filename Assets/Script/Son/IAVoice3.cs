@@ -186,7 +186,10 @@ public class IAVoice3 : MonoBehaviour {
 
     private float getAngleWithObject(Transform target)
     {
-        return Vector3.Angle(target.position - Camera.main.transform.position, Camera.main.transform.forward);
+        Vector3 targetCameraVec = target.position - Camera.main.transform.position;
+        Vector2 targetCamVec2 = new Vector2(targetCameraVec.x, targetCameraVec.z);
+        Vector2 forward = new Vector2(Camera.main.transform.forward.x, Camera.main.transform.forward.z);
+        return Vector2.Angle(targetCamVec2, forward);
     }
 
     private void playSound(SoundTemplate sound)
