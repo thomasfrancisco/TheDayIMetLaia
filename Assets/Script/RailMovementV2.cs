@@ -115,6 +115,10 @@ public class RailMovementV2 : MonoBehaviour
                                     sonAiguillage.playDecroche();
                                 intersection.resetNextRailSound();
                                 inactivityTimer = 0f;
+                                for(int i = 0; i < intersection.allRails.Length; i++)
+                                {
+                                    intersection.allRails[i].stopHover();
+                                }
                             }
                         }
                         else if (Input.GetButtonDown("Fire1") || Input.inputString == "\n")
@@ -361,9 +365,7 @@ public class RailMovementV2 : MonoBehaviour
     {
         float verticalAxis = Input.GetAxis("Vertical");
         float angleNextElement = getAngleWithObject(previous.transform);
-        Debug.Log("Angle next element : " + angleNextElement);
         float angleSecondElement = getAngleWithObject(next.transform);
-        Debug.Log("Angle second element : " + angleSecondElement);
 
         if (angleSecondElement < angleMaxDirection)
         {
@@ -443,31 +445,48 @@ public class RailMovementV2 : MonoBehaviour
                 inactivityTimer = 0f;
             }
 
+            bool catchOne = false;
             for (int i = 0; i < intersection.allRails.Length; i++)
             {
                 if (getAngleWithObject(intersection.allRails[i].transform) < angleIntersection)
                 {
+                    catchOne = true;
                     if (intersectionLookingAt)
                     {
                         if (intersection.allRails[i].transform != intersectionLookingAt)
                         {
                             if (intersection.allRails[i].transform == intersection.northRail)
+                            {
                                 intersection.allRails[i].playMySound(RailPosition.North);
+                            }
                             else if (intersection.allRails[i].transform == intersection.westRail)
+                            {
                                 intersection.allRails[i].playMySound(RailPosition.West);
+                            }
                             else if (intersection.allRails[i].transform == intersection.southRail)
+                            {
                                 intersection.allRails[i].playMySound(RailPosition.South);
+                            }
                             else if (intersection.allRails[i].transform == intersection.eastRail)
+                            {
                                 intersection.allRails[i].playMySound(RailPosition.East);
+                            }
+                            
                             inactivityTimer = 0f;
                         }
                     }
                     intersectionLookingAt = intersection.allRails[i].transform;
-                    return;
+                    intersection.allRails[i].playHover();
+                } else
+                {
+                    intersection.allRails[i].stopHover();
                 }
             }
             // o.O' ?
-            intersectionLookingAt = intersection.transform;
+            if (!catchOne)
+            {
+                intersectionLookingAt = intersection.transform;
+            }
         }
 
     }

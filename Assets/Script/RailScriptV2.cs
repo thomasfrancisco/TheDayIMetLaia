@@ -24,6 +24,7 @@ public class RailScriptV2 : MonoBehaviour {
     public AudioClip eastSound;
     public AudioClip southSound;
     public AudioClip westSound;
+    public AudioClip hoverSound;
 
     private AudioSource source;
     private RailScriptV2[] aig1;
@@ -35,6 +36,7 @@ public class RailScriptV2 : MonoBehaviour {
     private RailPosition[] allRailsPosition;
     private int itRails;
     private int emptyHit = 2;
+    private float volumeMax;
 
     //Pour trigger les collisions
     [HideInInspector]
@@ -49,7 +51,7 @@ public class RailScriptV2 : MonoBehaviour {
         isSelected = false;
         itRails = 0;
         source = GetComponent<AudioSource>();
-        
+        volumeMax = source.volume;
 
     }
 
@@ -216,6 +218,25 @@ public class RailScriptV2 : MonoBehaviour {
         itRails = 0;
     }
 
+    public void playHover()
+    {
+        if (!source.isPlaying)
+        {
+            source.volume = .25f;
+            source.clip = hoverSound;
+            source.loop = true;
+            source.Play();
+        }
+    }
+
+    public void stopHover()
+    {
+        if(source.clip == hoverSound && source.isPlaying)
+        {
+            source.Stop();
+        }
+    }
+
     public void playMySound(RailPosition railPosition)
     {
         switch (railPosition)
@@ -233,6 +254,8 @@ public class RailScriptV2 : MonoBehaviour {
                 source.clip = westSound;
                 break;
         }
+        source.volume = volumeMax;
+        source.loop = false;
         source.Play();
     }
 
