@@ -152,11 +152,6 @@ public class Son_Niveau_1 : MonoBehaviour {
             playSound(sound1_4_2);
             
         }
-        if (ugoMovement.getIntersection() == intersectionSansAigScript && !sound1_4_3.isPlayed())
-        {
-            playSound(sound1_4_3);
-            
-        }
         if (ugoMovement.getIntersection() == railEvent01Script && !sound1_5.isPlayed())
         {
             playSound(sound1_5);
